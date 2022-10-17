@@ -1,0 +1,47 @@
+## XBotInterface related configs
+
+XBotInterface:
+ urdf_path: /tmp/modularbot.urdf
+ srdf_path: /tmp/modularbot.srdf
+
+ModelInterface:
+  model_type: RBDL
+  is_model_floating_base: true
+  
+  
+## XBot2 related configuration
+
+# hal
+xbotcore_device_configs:
+    sim: $(rospack find modular_xbot2)/hal/ModularBot_gz.yaml
+    dummy: $(rospack find modular_xbot2)/hal/ModularBot_dummy.yaml
+    ec_imp: $(rospack find modular_xbot2)/hal/ModularBot_ec_all.yaml
+    ec_idle: $(rospack find modular_xbot2)/hal/ModularBot_ec_all.yaml
+
+# define threads to be created
+xbotcore_threads:
+  rt_main: { sched: fifo, prio: 60, period: 0.001}
+  nrt_main: { sched: other, prio: 0, period: 0.005 }
+  
+# define plugins to be loaded
+xbotcore_plugins:
+  # this plugin is shipped with xbot2, and it generates the
+  # ROS api for the framework
+  # it is not designed to be real-time safe, so it must executed
+  # inside a thread with `other` priority
+  ros_io: { thread: nrt_main, type: ros_io }
+  ros_ctrl: { thread: nrt_main, type: ros_control }
+
+  # a simple homing module
+  homing:
+    thread: rt_main
+    type: homing
+    params:
+      time: { value: 5.0, type: double }
+
+# additional parameters that don't relate to any plugin
+xbotcore_param:
+  /xbotcore/joint_safety/filter_autostart: {value: true, type: bool}
+  /xbotcore/joint_safety/filter_cutoff_hz: {value: 2.0, type: double}
+  # /xbotcore/joint_safety/enable_safety: {value: false, type: bool}
+

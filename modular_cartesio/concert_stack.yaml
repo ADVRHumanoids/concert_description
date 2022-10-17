@@ -1,0 +1,95 @@
+
+stack:
+  - ['ee', 'base', 'steering_fl', 'steering_fr', 'steering_hl', 'steering_hr']
+  - ['postural', 'rolling_fl', 'rolling_fr', 'rolling_hl', 'rolling_hr']
+
+constraints:
+  - joint_limits
+  - velocity_limits
+
+properties:
+  - &wheel_radius 0.16 
+
+ee:
+  type: Cartesian
+  name: tcp
+  distal_link: ee_E
+  base_link: base_link
+  lambda: 0.1
+
+base:
+  type: Cartesian
+  distal_link: mobile_base
+  lambda: 0.1
+  name: base_link
+  
+postural:
+  type: Postural
+  lambda: 0.005
+  disabled_joints:
+    - J1_A
+    - J2_A
+    - J1_B
+    - J2_B
+    - J1_C
+    - J2_C
+    - J1_D
+    - J2_D
+
+joint_limits:
+  type: JointLimits
+
+velocity_limits:
+  type: VelocityLimits
+
+steering_fl:
+    type: CentauroSteering
+    wheel_name: L_2_A
+    lib_name: libcentauro_cartesio_addon.so
+    lambda: 0.1
+
+steering_fr:
+    type: CentauroSteering
+    wheel_name: L_2_B
+    lib_name: libcentauro_cartesio_addon.so
+    lambda: 0.1
+
+steering_hl:
+    type: CentauroSteering
+    wheel_name: L_2_C
+    lib_name: libcentauro_cartesio_addon.so
+    lambda: 0.1
+
+steering_hr:
+    type: CentauroSteering
+    wheel_name: L_2_D
+    lib_name: libcentauro_cartesio_addon.so
+    lambda: 0.1
+
+rolling_fl:
+    type: WheelRolling
+    wheel_name: L_2_A
+    lib_name: libcentauro_cartesio_addon.so
+    wheel_radius: *wheel_radius
+    weight: 1000.0
+
+rolling_fr:
+    type: WheelRolling
+    wheel_name: L_2_B
+    lib_name: libcentauro_cartesio_addon.so
+    wheel_radius: *wheel_radius
+    weight: 1000.0
+
+rolling_hl:
+    type: WheelRolling
+    wheel_name: L_2_C
+    lib_name: libcentauro_cartesio_addon.so
+    wheel_radius: *wheel_radius
+    weight: 1000.0
+
+rolling_hr:
+    type: WheelRolling
+    wheel_name: L_2_D
+    lib_name: libcentauro_cartesio_addon.so
+    wheel_radius: *wheel_radius
+    weight: 1000.0

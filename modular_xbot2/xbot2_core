@@ -1,0 +1,4 @@
+#!/bin/bash
+
+# note: skip last arg
+xbot2-core ${@:1:$#-1}
