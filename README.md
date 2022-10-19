@@ -1,6 +1,11 @@
 # modular_description
 ROS package containing modular's simulation scripts and launch files
 
+## Docker image
+A ready-to-use Docker container is provided, and it can be executed with `./run-docker.bash`. Upon
+first execution, a lot of data might be downloaded. The container can be used to follow the rest 
+of this readme.
+
 ## Dependencies
 
  - ROS (desktop full is recommended, `moveit-core`)
@@ -46,5 +51,10 @@ mon launch modular_cartesio concert.launch xbot:=true gui:=true
 ```
 ![Screenshot from 2022-10-17 18-51-15](https://user-images.githubusercontent.com/22152172/196236956-f50d8b5a-fea2-4c0a-865f-bfdf74d216f0.png)
 Then, right-click on the interactive marker, and select *Continuous Ctrl*. Move the marker around, and see the resulting motion in Gazebo.
+
+**Note** that this last part requires additional dependencies (see also `setup-docker.bash`), that can be installed via the *hhcm-forest* tool. Follow instructions from [here](https://github.com/ADVRHumanoids/multidof_recipes) and then invoke
+```
+forest grow centauro_cartesio
+```
 
 

@@ -53,6 +53,7 @@ COPY --chown=user:user modular_resources forest_ws/ros_src/modular_description/m
 COPY --chown=user:user modular_xbot2 forest_ws/ros_src/modular_description/modular_xbot2
 
 # HACK we copy modular for now, since it's not available open source 
+# NOTE: right now, external users can't build this docker image because of this!
 COPY --chown=user:user modular forest_ws/src/modular
 
 COPY --chown=user:user setup-docker.bash .
