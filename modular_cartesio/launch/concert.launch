@@ -18,10 +18,10 @@
         textfile="$(arg ik)"/>
 
     <param name="cartesian/joint_blacklist" type="yaml" 
-        value="[J2_A, J2_B, J2_C, J2_D]"/>
+        value="[J_wheel_A, J_wheel_B, J_wheel_C, J_wheel_D]"/>
     
     <param name="cartesian/velocity_whitelist" type="yaml" 
-        value="[J2_A, J2_B, J2_C, J2_D]"/>
+        value="[J_wheel_A, J_wheel_B, J_wheel_C, J_wheel_D]"/>
 
     <group ns="$(arg namespace)">
 

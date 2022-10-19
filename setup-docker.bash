@@ -21,8 +21,10 @@ echo "source $PWD/setup.bash" >> /home/user/.bashrc
 
 # a few usage tips..
 echo 'echo "USAGE:"' >> /home/user/.bashrc
-echo 'echo "run simulation: mon launch modular_gazebo concert.launch"' >> /home/user/.bashrc
-echo 'echo "run monitoring gui: xbot2-gui >> /home/user/.bashrc"' >> /home/user/.bashrc
-echo 'echo "run CartesI/O IK + RViz: mon launch modular_cartesio concert.launch xbot:=true gui:=true"' >> /home/user/.bashrc
+echo 'echo "run simulation....: mon launch modular_gazebo concert.launch"' >> /home/user/.bashrc
+echo 'echo "run monitoring gui: xbot2-gui"' >> /home/user/.bashrc
+echo 'echo "run CartesI/O IK..: mon launch modular_cartesio concert.launch xbot:=true gui:=true"' >> /home/user/.bashrc
 echo 'echo ""' >> /home/user/.bashrc
+
+
 
