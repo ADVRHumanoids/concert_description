@@ -5,7 +5,7 @@
     <arg name="xbot2" default="true"/>
 
     <!-- modular configuration -->
-    <arg name="modular_description" default="$(find modular_examples)/concert_example.py"/>
+    <arg name="modular_description" default="$(find concert_examples)/concert_example.py"/>
 
     <!-- gazebo configuration parameters -->
     <arg name="paused" default="false"/>
@@ -30,10 +30,10 @@
 
 
     <!-- from where the simulation enviornment will be loaded -->
-    <arg name="world_name" default="$(find modular_gazebo)/world/empty_world.sdf"/>
+    <arg name="world_name" default="$(find concert_gazebo)/world/empty_world.sdf"/>
 
 
-    <include file="$(find modular_gazebo)/launch/modular.launch" pass_all_args="true"/>
+    <include file="$(find concert_gazebo)/launch/modular.launch" pass_all_args="true"/>
         
 
 

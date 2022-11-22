@@ -5,7 +5,7 @@
     <arg name="xbot2" default="true"/>
 
     <!-- modular configuration -->
-    <arg name="modular_description" default="$(find modular_examples)/modular_6dof.py"/>
+    <arg name="modular_description" default="$(find concert_examples)/pino_6dof.py"/>
 
     <!-- gazebo configuration parameters -->
     <arg name="paused" default="false"/>
@@ -30,7 +30,7 @@
 
 
     <!-- from where the simulation enviornment will be loaded -->
-    <arg name="world_name" default="$(find modular_gazebo)/world/empty_world.sdf"/>
+    <arg name="world_name" default="$(find concert_gazebo)/world/empty_world.sdf"/>
 
 
     <!-- Load the URDF/SRDF into the ROS Parameter Server -->
@@ -62,8 +62,8 @@
 
 
     <!-- run xbot2 -->
-    <node if="$(arg xbot2)" pkg="modular_xbot2" type="xbot2_core" name="xbot2" output="screen"
-        args="--hw sim --simtime --config $(find modular_xbot2)/modular.yaml"/>
+    <node if="$(arg xbot2)" pkg="concert_xbot2" type="xbot2_core" name="xbot2" output="screen"
+        args="--hw sim --simtime --config $(find concert_xbot2)/modular.yaml"/>
 
 
 </launch>

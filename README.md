@@ -1,4 +1,4 @@
-# modular_description
+# concert_description
 ROS package containing modular's simulation scripts and launch files
 
 ## Docker image
@@ -19,7 +19,7 @@ Drop into a catkin workspace's `src/` folder. If you're using `catkin_tools`, yo
 
 #### Launch the simulation environment, including the `xbot2` process
 ```
-mon launch modular_gazebo concert.launch
+mon launch concert_gazebo concert.launch
 ```
 ![Screenshot from 2022-10-17 18-44-46](https://user-images.githubusercontent.com/22152172/196235597-9850b985-72cf-4bfd-a0e3-28dedcb12420.png)
 
@@ -47,7 +47,7 @@ Messages published on the `/xbotcore/command` topic are now forwarded to the sim
 #### Move the base with IK 
 First, enable the *ros_ctrl* module. Then, invoke the following launch file
 ```
-mon launch modular_cartesio concert.launch xbot:=true gui:=true
+mon launch concert_cartesio concert.launch xbot:=true gui:=true
 ```
 ![Screenshot from 2022-10-17 18-51-15](https://user-images.githubusercontent.com/22152172/196236956-f50d8b5a-fea2-4c0a-865f-bfdf74d216f0.png)
 Then, right-click on the interactive marker, and select *Continuous Ctrl*. Move the marker around, and see the resulting motion in Gazebo.
