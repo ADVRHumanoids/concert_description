@@ -6,7 +6,7 @@ XBotInterface:
 
 ModelInterface:
   model_type: RBDL
-  is_model_floating_base: true
+
   
   
 ## XBot2 related configuration

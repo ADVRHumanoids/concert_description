@@ -1,0 +1,80 @@
+zmq_setup:
+    timeout: 1000
+J1_A:
+    control_mode: idle
+    pid:
+        impedance:
+            - 500.0
+            - 20.0
+            - 1.0
+            - 0.025
+            - 0.99
+        position:
+            - 1000.0
+            - 0.0
+            - 30.0
+J2_A:
+    control_mode: idle
+    pid:
+        impedance:
+            - 500.0
+            - 20.0
+            - 1.0
+            - 0.025
+            - 0.99
+        position:
+            - 1000.0
+            - 0.0
+            - 30.0
+J3_A:
+    control_mode: idle
+    pid:
+        impedance:
+            - 500.0
+            - 20.0
+            - 1.0
+            - 0.025
+            - 0.99
+        position:
+            - 1000.0
+            - 0.0
+            - 30.0
+J4_A:
+    control_mode: idle
+    pid:
+        impedance:
+            - 500.0
+            - 20.0
+            - 1.0
+            - 0.025
+            - 0.99
+        position:
+            - 1000.0
+            - 0.0
+            - 30.0
+J5_A:
+    control_mode: idle
+    pid:
+        impedance:
+            - 500.0
+            - 20.0
+            - 1.0
+            - 0.025
+            - 0.99
+        position:
+            - 1000.0
+            - 0.0
+            - 30.0
+J6_A:
+    control_mode: idle
+    pid:
+        impedance:
+            - 500.0
+            - 20.0
+            - 1.0
+            - 0.025
+            - 0.99
+        position:
+            - 1000.0
+            - 0.0
+            - 30.0
