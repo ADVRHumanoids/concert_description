@@ -11,11 +11,13 @@ ENV HHCM_FOREST_CLONE_DEFAULT_PROTO=https
 
 RUN forest init
 RUN echo "source $PWD/setup.bash" >> /home/user/.bashrc
-RUN echo 1 && forest add-recipes git@github.com:advrhumanoids/multidof_recipes.git --tag master 
-RUN echo 0 && forest grow concert_description
+RUN forest add-recipes git@github.com:advrhumanoids/multidof_recipes.git --tag master 
 
 # steering/rolling modules for ik
-RUN echo 0 && forest grow centauro_cartesio -j 4
+RUN forest grow centauro_cartesio -j 4
+
+# concert simulation package
+RUN forest grow concert_description
 
 # a few usage tips..
 RUN echo 'echo "USAGE:"' >> /home/user/.bashrc
