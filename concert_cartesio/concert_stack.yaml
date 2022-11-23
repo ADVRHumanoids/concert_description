@@ -1,3 +1,5 @@
+solver_options:
+  regularization: 1e-4
 
 stack:
   - ['ee', 'base', 'steering_fl', 'steering_fr', 'steering_hl', 'steering_hr']
@@ -16,6 +18,7 @@ ee:
   distal_link: ee_E
   base_link: base_link
   lambda: 0.1
+  indices: [0, 1, 2]
 
 base:
   type: Cartesian
@@ -25,7 +28,7 @@ base:
   
 postural:
   type: Postural
-  lambda: 0.005
+  lambda: 0.01
   disabled_joints:
     - J1_A
     - J_wheel_A
