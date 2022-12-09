@@ -35,12 +35,20 @@
 
     <!-- Load the URDF/SRDF into the ROS Parameter Server -->
     <param name="robot_description_gz" 
-        command="python3 $(arg modular_description) -o urdf_gz"/>
+        command="python3 $(arg modular_description) -o urdf 
+                                                    -a gazebo_urdf:=true
+                                                        realsense:=$(arg realsense)
+                                                        velodyne:=$(arg velodyne)
+                                                    -r modularbot_gz"/>
 
     <param name="robot_description_xbot" 
-        command="python3 $(arg modular_description) -o urdf"/>
+        command="python3 $(arg modular_description) -o urdf 
+                                                    -a gazebo_urdf:=false
+                                                        realsense:=$(arg realsense)
+                                                        velodyne:=$(arg velodyne)
+                                                    -r modularbot"/>
 
-    <param name="robot_description_semantic_gz" 
+    <param name="robot_description_semantic" 
         command="python3 $(arg modular_description) -o srdf"/>
 
 
