@@ -8,8 +8,8 @@
     <arg name="modular_description" default="$(find concert_examples)/pino_6dof.py"/>
 
     <!-- modular configuration parameters -->
-    <arg name="realsense" default="true"/>
-    <arg name="velodyne" default="true"/>
+    <arg name="realsense" default="false"/>
+    <arg name="velodyne" default="false"/>
 
     <!-- gazebo configuration parameters -->
     <arg name="paused" default="false"/>
