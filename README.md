@@ -10,10 +10,52 @@ of this readme.
 
  - ROS (desktop full is recommended, `moveit-core`)
  - XBot2 binaries (see [here](https://advrhumanoids.github.io/xbot2/quickstart.html#system-setup) for instructions)
- - The Modular Python3 package (TBD - NOT DISTRIBUTED YET)
+ - The [modular](https://github.com/ADVRHumanoids/modular_hhcm) Python3 package (will be installed by [forest](https://github.com/ADVRHumanoids/forest))
  
 ## Setup
-Drop into a catkin workspace's `src/` folder. If you're using `catkin_tools`, you might need to build the workspace.
+In addition to using Docker, you can setup concert_description using [forest](https://github.com/ADVRHumanoids/forest). 
+
+1. **Install forest**:
+```
+[sudo] pip3 install hhcm-forest
+```
+
+2. Create a **forest workspace**. We are going to call it *concert_ws* for the sake of this example:
+```
+mkdir concert_ws && cd concert_ws
+```
+
+3. **Initialize** the forest workspace and **add recipes**: 
+```
+forest init
+echo "source $PWD/setup.bash" >> /home/USER/.bashrc
+forest add-recipes git@github.com:advrhumanoids/multidof_recipes.git --tag master 
+```
+Where you should substitute USER with your username.
+
+*Optional*: If you don't have any ssh key set up in your system run also:
+```
+export HHCM_FOREST_CLONE_DEFAULT_PROTO=https
+```
+and consider adding it to the .bashrc
+
+4. Finally, just run:
+```
+forest grow concert_description
+```
+which will clone this repo and install the [modular](https://github.com/ADVRHumanoids/modular_hhcm) package. 
+
+If you have the **XBot2 binaries** installed you are ready to simulate the CONCERT robot!
+
+---
+
+*P.S.* If you want to run also [this IK example](https://github.com/ADVRHumanoids/concert_description#move-the-base-with-ik) remember to also run:
+```
+forest grow centauro_cartesio -j 4
+```
+
+
+<!-- Drop into a catkin workspace's `src/` folder. If you're using `catkin_tools`, you might need to build the workspace. -->
  
 ## Quickstart (CONCERT example)
 
@@ -23,6 +65,12 @@ mon launch concert_gazebo concert.launch
 ```
 ![Screenshot from 2022-10-17 18-44-46](https://user-images.githubusercontent.com/22152172/196235597-9850b985-72cf-4bfd-a0e3-28dedcb12420.png)
 
+*Note*: For selecting to simulate **sensors** or not, the launch file accepts also a series of additional arguments. 
+For example to run a simulation that will load also the gazebo plugins for the **Realsense cameras** and the **Velodyne lidars** run:
+```
+mon launch concert_gazebo concert.launch realsense:=true velodyne:=true
+```
+You'll need to have the proper dependencies installed in your setup in order for sensor simulation to work. See the [forest recipe for this package](https://github.com/ADVRHumanoids/multidof_recipes/blob/master/recipes/concert_description.yaml).
 
 #### Launch XBot2's monitoring GUI
 ```
