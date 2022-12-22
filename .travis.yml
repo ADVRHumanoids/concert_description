@@ -3,6 +3,7 @@ services:
 
 branches:
   only:
+    - master
     - /^v\d+\.\d+\.\d+.*$/  # version tags
 
 notifications:
@@ -22,6 +23,6 @@ before_install:
   - set +e
 
 script: 
-  - docker push arturolaurenzi/concert_description:latest
-  - docker tag arturolaurenzi/concert_description:latest arturolaurenzi/concert_description:$TRAVIS_TAG
-  - docker push arturolaurenzi/concert_description:$TRAVIS_TAG
+  - if [ -z $TRAVIS_TAG ]; then echo "Not a tag build, will not upload docker registry"; docker push arturolaurenzi/concert_description:latest
+  - if [ -z $TRAVIS_TAG ]; then echo "Not a tag build, will not upload docker registry"; docker tag arturolaurenzi/concert_description:latest arturolaurenzi/concert_description:$TRAVIS_TAG
+  - if [ -z $TRAVIS_TAG ]; then echo "Not a tag build, will not upload docker registry"; docker push arturolaurenzi/concert_description:$TRAVIS_TAG
