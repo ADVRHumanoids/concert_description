@@ -6,6 +6,11 @@ A ready-to-use Docker container is provided, and it can be executed with `./run-
 first execution, a lot of data might be downloaded. The container can be used to follow the rest 
 of this readme.
 
+To **update the image** to the latest version
+```bash
+docker pull arturolaurenzi/concert_description
+```
+
 ## Dependencies
 
  - ROS (desktop full is recommended, `moveit-core`)
@@ -28,6 +33,7 @@ mkdir concert_ws && cd concert_ws
 3. **Initialize** the forest workspace and **add recipes**: 
 ```
 forest init
+source setup.bash
 echo "source $PWD/setup.bash" >> /home/USER/.bashrc
 forest add-recipes git@github.com:advrhumanoids/multidof_recipes.git --tag master 
 ```
@@ -61,9 +67,10 @@ forest grow centauro_cartesio -j 4
 
 #### Launch the simulation environment, including the `xbot2` process
 ```
-mon launch concert_gazebo concert.launch
+mon launch concert_gazebo concert.launch [rviz:=true]
 ```
 ![Screenshot from 2022-10-17 18-44-46](https://user-images.githubusercontent.com/22152172/196235597-9850b985-72cf-4bfd-a0e3-28dedcb12420.png)
+![MicrosoftTeams-image (4)](https://user-images.githubusercontent.com/22152172/209342651-12d59ce9-7d62-43fe-8a55-970304862c75.png)
 
 *Note*: For selecting to simulate **sensors** or not, the launch file accepts also a series of additional arguments. 
 For example to run a simulation that will load also the gazebo plugins for the **Realsense cameras** and the **Velodyne lidars** run:
@@ -104,5 +111,12 @@ Then, right-click on the interactive marker, and select *Continuous Ctrl*. Move 
 ```
 forest grow centauro_cartesio
 ```
+
+**Note** to control the base in velocity mode (i.e., via `geometry_msgs/TwistStamped` messages), you must first invoke the following ROS service:
+```
+rosservice call /cartesian/base_link/set_control_mode velocity
+```
+Upon succesful return, you can move the base by *continuously* sending velocity commands to the topic `/cartesian/base_link/velocity_reference`; note that the `msg.header.frame_id` field of the published messages can be usefully set to `base_link` in order to have the commanded twist interpreted w.r.t. the local frame.
+
 
 
