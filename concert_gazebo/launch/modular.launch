@@ -21,6 +21,9 @@
     <arg name="verbose" default="false"/>
     <arg name="extra_gazebo_args" default=""/>
 
+    <!-- run rviz ? -->
+    <arg name="rviz" default="false"/>
+
 
     <!-- Internal arguments, rewrite human-readable gazebo arguments to it's internal arguments -->
     <arg unless="$(arg paused)" name="command_arg1" value=""/>
@@ -76,6 +79,11 @@
     <!-- run xbot2 -->
     <node if="$(arg xbot2)" pkg="concert_xbot2" type="xbot2_core" name="xbot2" output="screen"
         args="--hw sim --simtime --config $(find concert_xbot2)/modular.yaml"/>
+
+    
+    <!-- run rviz -->
+    <node if="$(arg rviz)" pkg="rviz" type="rviz" name="rviz" output="screen"
+        args="-d $(find concert_gazebo)/rviz/concert_sensors.rviz"/>
 
 
 </launch>

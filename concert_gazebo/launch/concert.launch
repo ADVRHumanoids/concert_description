@@ -21,6 +21,8 @@
     <arg name="verbose" default="false"/>
     <arg name="extra_gazebo_args" default=""/>
 
+    <!-- run rviz ? -->
+    <arg name="rviz" default="false"/>
 
     <!-- Internal arguments, rewrite human-readable gazebo arguments to it's internal arguments -->
     <arg unless="$(arg paused)" name="command_arg1" value=""/>
