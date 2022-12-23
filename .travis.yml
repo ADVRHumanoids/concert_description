@@ -23,6 +23,7 @@ before_install:
   - set +e
 
 script: 
-  - if [ -z $TRAVIS_TAG ]; then echo "Not a tag build, will not upload docker registry"; docker push arturolaurenzi/concert_description:latest; fi
-  - if [ -z $TRAVIS_TAG ]; then echo "Not a tag build, will not upload docker registry"; docker tag arturolaurenzi/concert_description:latest arturolaurenzi/concert_description:$TRAVIS_TAG; fi
-  - if [ -z $TRAVIS_TAG ]; then echo "Not a tag build, will not upload docker registry"; docker push arturolaurenzi/concert_description:$TRAVIS_TAG; fi
+  - if [ -z $TRAVIS_TAG ]; then echo "Not a tag build, will not upload docker registry"; travis_terminate 0; fi
+  - docker push arturolaurenzi/concert_description:latest; fi
+  - docker tag arturolaurenzi/concert_description:latest arturolaurenzi/concert_description:$TRAVIS_TAG; fi
+  - docker push arturolaurenzi/concert_description:$TRAVIS_TAG; fi
