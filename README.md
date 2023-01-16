@@ -88,7 +88,7 @@ xbot2-gui
 ```
 rosservice call /xbotcore/homing/switch 1
 ```
-or click *Start* on the GUI, next to the *homing* label.
+or click *Start* on the GUI, next to the *homing* label. 
 
 ![Screenshot from 2022-10-17 18-43-39](https://user-images.githubusercontent.com/22152172/196235414-8a4d1282-0122-416d-bf4a-04242abe7d32.png)
 
@@ -100,7 +100,7 @@ or click *Start* on the GUI, next to the *ros_ctrl* label. NOTE: you must not pu
 Messages published on the `/xbotcore/command` topic are now forwarded to the simulator. This can be done (for debugging purposes) also via the GUI's sliders.
 
 #### Move the base with IK 
-First, enable the *ros_ctrl* module. Then, invoke the following launch file
+First, make sure that the *ros_ctrl* module is enable, and that the robot arm is not in a singular configuration (e.g., run the homing module once). Then, invoke the following launch file
 ```
 mon launch concert_cartesio concert.launch xbot:=true gui:=true
 ```
