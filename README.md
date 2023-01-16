@@ -118,5 +118,8 @@ rosservice call /cartesian/base_link/set_control_mode velocity
 ```
 Upon succesful return, you can move the base by *continuously* sending velocity commands to the topic `/cartesian/base_link/velocity_reference`; note that the `msg.header.frame_id` field of the published messages can be usefully set to `base_link` in order to have the commanded twist interpreted w.r.t. the local frame.
 
+## Further documentation
 
-
+The robot API: https://advrhumanoids.github.io/XBotInterface/
+XBot2: https://advrhumanoids.github.io/xbot2/ , https://github.com/ADVRHumanoids/xbot2_examples
+CartesIO: https://advrhumanoids.github.io/CartesianInterface/
