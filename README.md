@@ -121,5 +121,7 @@ Upon succesful return, you can move the base by *continuously* sending velocity 
 ## Further documentation
 
 The robot API: https://advrhumanoids.github.io/XBotInterface/
+
 XBot2: https://advrhumanoids.github.io/xbot2/ , https://github.com/ADVRHumanoids/xbot2_examples
+
 CartesIO: https://advrhumanoids.github.io/CartesianInterface/
