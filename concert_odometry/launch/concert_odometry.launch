@@ -1,0 +1,64 @@
+<launch>
+
+<arg name="publish_ground_truth" default="false"/>
+<arg name="gui" default="false"/>
+
+<node pkg="base_estimation"
+        type="base_estimation_node"
+        name="concert_odometry"
+        output="screen">
+
+    <param name="ik_problem" textfile="$(find concert_odometry)/config/concert_odometry.yaml"/>
+    <param name="rate" value="200.0"/>
+
+    <param name="contact_attach_thr" value="-100.0"/>
+    <param name="contact_release_thr" value="-150.0"/>
+    <param name="velocity_filter/omega" value="100.0"/>
+
+    <param name="rolling_contacts/wheel_A" value="wheel_A"/>
+    <param name="rolling_contacts/wheel_B" value="wheel_B"/>
+    <param name="rolling_contacts/wheel_C" value="wheel_C"/>
+    <param name="rolling_contacts/wheel_D" value="wheel_D"/>
+
+    <param name="z_force_override/wheel_A" value="400.0"/>
+    <param name="z_force_override/wheel_B" value="400.0"/>
+    <param name="z_force_override/wheel_C" value="400.0"/>
+    <param name="z_force_override/wheel_D" value="400.0"/>
+
+    <param name="use_imu" value="false"/>
+
+    <param name="publish_tf" value="true"/>
+
+    <param name="world_from_tf" value="world"/>
+
+    <remap from="/robot_description" to="/xbotcore/robot_description"/>
+    <remap from="/robot_description_semantic" to="/xbotcore/robot_description_semantic"/>
+
+</node>
+
+<node if="$(arg publish_ground_truth)" 
+    pkg="base_estimation"
+    type="gazebo_tf_publisher"
+    name="gz_tf_publisher"
+    output="screen">
+    
+    <param name="gz_link" value="ModularBot::base_link"/>
+    <param name="tf_link" value="base_link"/>
+    <param name="world" value="world"/>
+</node>
+
+<node if="$(arg publish_ground_truth)" 
+    pkg="tf"
+    type="static_transform_publisher"
+    args="0 0 0 0 0 0 world odometry/world 10"
+    name="connect_worlds"
+    output="screen"/>
+
+<node if="$(arg gui)" 
+    pkg="rviz"
+    type="rviz"
+    args="-d $(find concert_odometry)/rviz/concert_odometry.rviz"
+    name="odom_rviz"
+    output="screen"/>
+
+</launch>
