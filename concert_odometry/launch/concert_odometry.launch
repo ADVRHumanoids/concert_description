@@ -3,6 +3,7 @@
 <arg name="publish_ground_truth" default="false"/>
 <arg name="gui" default="false"/>
 
+<!-- The main base estimation node  -->
 <node pkg="base_estimation"
         type="base_estimation_node"
         name="concert_odometry"
@@ -14,12 +15,15 @@
     <param name="contact_attach_thr" value="-100.0"/>
     <param name="contact_release_thr" value="-150.0"/>
     <param name="velocity_filter/omega" value="100.0"/>
-
+    
+    <!-- Create four rolling contacts, and specify a ft sensor for each one.
+    Ft sensors are used to provide a belief measure -->
     <param name="rolling_contacts/wheel_A" value="wheel_A"/>
     <param name="rolling_contacts/wheel_B" value="wheel_B"/>
     <param name="rolling_contacts/wheel_C" value="wheel_C"/>
     <param name="rolling_contacts/wheel_D" value="wheel_D"/>
 
+    <!-- In our case, create a virtual ft with a fixed value of 400N -->
     <param name="z_force_override/wheel_A" value="400.0"/>
     <param name="z_force_override/wheel_B" value="400.0"/>
     <param name="z_force_override/wheel_C" value="400.0"/>
@@ -29,13 +33,16 @@
 
     <param name="publish_tf" value="true"/>
 
-    <param name="world_from_tf" value="world"/>
+    <!-- If we have a ground truth source (e.g. gazebo), start odometry from the 
+    ground truth value -->
+    <param if="$(arg publish_ground_truth)" name="world_from_tf" value="world"/>
 
     <remap from="/robot_description" to="/xbotcore/robot_description"/>
     <remap from="/robot_description_semantic" to="/xbotcore/robot_description_semantic"/>
 
 </node>
 
+<!-- Publish ground truth from gazebo to TF -->
 <node if="$(arg publish_ground_truth)" 
     pkg="base_estimation"
     type="gazebo_tf_publisher"
@@ -47,6 +54,7 @@
     <param name="world" value="world"/>
 </node>
 
+<!-- Connect ground truth world to odometry world -->
 <node if="$(arg publish_ground_truth)" 
     pkg="tf"
     type="static_transform_publisher"
@@ -54,6 +62,7 @@
     name="connect_worlds"
     output="screen"/>
 
+<!-- RViz -->
 <node if="$(arg gui)" 
     pkg="rviz"
     type="rviz"
