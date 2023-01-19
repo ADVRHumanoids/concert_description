@@ -10,6 +10,7 @@
     <!-- modular configuration parameters -->
     <arg name="realsense" default="false"/>
     <arg name="velodyne" default="false"/>
+    <arg name="use_gpu_ray" default="false"/>
 
     <!-- gazebo configuration parameters -->
     <arg name="paused" default="false"/>
@@ -46,6 +47,7 @@
                                                     -a gazebo_urdf:=true
                                                         realsense:=$(arg realsense)
                                                         velodyne:=$(arg velodyne)
+                                                        use_gpu_ray:=$(arg use_gpu_ray)
                                                     -r modularbot_gz"/>
 
     <param name="robot_description_xbot" 
@@ -53,6 +55,7 @@
                                                     -a gazebo_urdf:=false
                                                         realsense:=$(arg realsense)
                                                         velodyne:=$(arg velodyne)
+                                                        use_gpu_ray:=$(arg use_gpu_ray)
                                                     -r modularbot"/>
 
     <param name="robot_description_semantic" 
