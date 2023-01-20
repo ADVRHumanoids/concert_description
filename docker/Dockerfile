@@ -17,6 +17,10 @@ ENV HHCM_FOREST_CLONE_DEFAULT_PROTO=https
 RUN forest init
 RUN echo "source $PWD/setup.bash" >> /home/user/.bashrc
 RUN forest add-recipes git@github.com:advrhumanoids/multidof_recipes.git --tag master 
+WORKDIR /home/user/concert_ws/recipes/multidof_recipes
+RUN git fetch
+RUN git pull
+WORKDIR /home/user/concert_ws
 
 # concert packages
 RUN forest grow concert_all --verbose --jobs 4 --pwd user
