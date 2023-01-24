@@ -9,8 +9,10 @@
         name="concert_odometry"
         output="screen">
 
-    <param name="ik_problem" textfile="$(find concert_odometry)/config/concert_odometry.yaml"/>
+    <param name="ik_problem" textfile="$(find concert_odometry)/config/concert_odometry_stack.yaml"/>
     <param name="rate" value="200.0"/>
+    
+    <rosparam command="load" file="$(find concert_odometry)/config/concert_odometry.yaml" />
 
     <param name="contact_attach_thr" value="-100.0"/>
     <param name="contact_release_thr" value="-150.0"/>
