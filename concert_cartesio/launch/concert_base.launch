@@ -1,0 +1,19 @@
+<launch>
+
+<arg name="rate" default="100.0"/>
+<arg name="prefix" default=""/>
+<arg name="ik" default="$(find concert_cartesio)/concert_stack_base.yaml"/>
+<arg name="xbot" default="false"/>
+<arg name="gui" default="false"/>
+
+<arg name="tf_prefix" default="ci"/>
+<arg name="markers" default="true"/>
+<arg name="namespace" default="/"/>
+<arg name="is_model_floating_base" default="true"/>
+<arg name="world_frame_link" default="!"/>
+<arg name="solution_topic" default="!"/>
+<arg name="enable_otg" default="true"/>
+
+<include file="$(find concert_cartesio)/launch/concert.launch" pass_all_args="true"/>
+
+</launch>
