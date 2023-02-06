@@ -12,7 +12,7 @@ with suppress_stdout():
     # leg + wheel 1
     data = urdf_writer.select_module_from_name('mobile_base_con1')
     wheel_data, steering_data = urdf_writer.add_wheel_module(wheel_filename='concert/module_wheel_concert.json', 
-                                        steering_filename='concert/module_steering_concert.json', 
+                                        steering_filename='concert/module_steering_concert_fl_rr.json', 
                                         angle_offset=0.0)
     homing_joint_map[str(steering_data['lastModule_name'])] = {'angle': 1.57}
     homing_joint_map[str(wheel_data['lastModule_name'])] = {'angle': 0.0}
@@ -20,7 +20,7 @@ with suppress_stdout():
     # leg + wheel 2
     data = urdf_writer.select_module_from_name('mobile_base_con2')
     wheel_data, steering_data = urdf_writer.add_wheel_module(wheel_filename='concert/module_wheel_concert.json', 
-                                        steering_filename='concert/module_steering_concert.json', 
+                                        steering_filename='concert/module_steering_concert_fr_rl.json', 
                                         angle_offset=0.0)
     homing_joint_map[str(steering_data['lastModule_name'])] = {'angle': -1.57}
     homing_joint_map[str(wheel_data['lastModule_name'])] = {'angle': 0.0}
@@ -28,7 +28,7 @@ with suppress_stdout():
     # leg + wheel 3
     data = urdf_writer.select_module_from_name('mobile_base_con3')
     wheel_data, steering_data = urdf_writer.add_wheel_module(wheel_filename='concert/module_wheel_concert.json', 
-                                        steering_filename='concert/module_steering_concert.json', 
+                                        steering_filename='concert/module_steering_concert_fr_rl.json', 
                                         angle_offset=0.0)
     homing_joint_map[str(steering_data['lastModule_name'])] = {'angle': -1.57}
     homing_joint_map[str(wheel_data['lastModule_name'])] = {'angle': 0.0}
@@ -36,7 +36,7 @@ with suppress_stdout():
     # leg + wheel 4
     data = urdf_writer.select_module_from_name('mobile_base_con4')
     wheel_data, steering_data = urdf_writer.add_wheel_module(wheel_filename='concert/module_wheel_concert.json', 
-                                        steering_filename='concert/module_steering_concert.json', 
+                                        steering_filename='concert/module_steering_concert_fl_rr.json', 
                                         angle_offset=0.0)
     homing_joint_map[str(steering_data['lastModule_name'])] = {'angle': 1.57}
     homing_joint_map[str(wheel_data['lastModule_name'])] = {'angle': 0.0}
