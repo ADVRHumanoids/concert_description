@@ -3,6 +3,14 @@ xbotcore_devices:
     joint_gz:
         names: []
         thread: rt_main
+        params:
+          mask_override:
+            value: 
+              J_wheel_A: 2
+              J_wheel_B: 2
+              J_wheel_C: 2
+              J_wheel_D: 2
+            type: map<string,int>
 
     joint_master:
         master: true  # this is a master device for 'joint'
