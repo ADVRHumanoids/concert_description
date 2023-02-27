@@ -50,7 +50,7 @@ with suppress_stdout():
 
     # J2
     data = urdf_writer.add_module('concert/module_joint_elbow_concert.json', 0, False)
-    homing_joint_map[str(data['lastModule_name'])] = {'angle': 0.5}
+    homing_joint_map[str(data['lastModule_name'])] = {'angle': -0.5}
 
     # add a 10cm passive link
     #data = urdf_writer.add_module('concert/module_link_straight_10_concert.json', 0, False)
@@ -64,7 +64,7 @@ with suppress_stdout():
 
     # J4
     data = urdf_writer.add_module('concert/module_joint_elbow_concert.json', 0, False)
-    homing_joint_map[str(data['lastModule_name'])] = {'angle': -0.5}
+    homing_joint_map[str(data['lastModule_name'])] = {'angle': 0.5}
 
     # J5
     data = urdf_writer.add_module('concert/module_joint_yaw_concert.json', 0, False)
