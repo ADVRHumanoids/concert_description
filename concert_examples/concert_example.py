@@ -14,7 +14,7 @@ with suppress_stdout():
     wheel_data, steering_data = urdf_writer.add_wheel_module(wheel_filename='concert/module_wheel_concert.json', 
                                         steering_filename='concert/module_steering_concert_fl_rr.json', 
                                         angle_offset=0.0)
-    homing_joint_map[str(steering_data['lastModule_name'])] = {'angle': 1.57}
+    homing_joint_map[str(steering_data['lastModule_name'])] = {'angle': 0.0}
     homing_joint_map[str(wheel_data['lastModule_name'])] = {'angle': 0.0}
 
     # leg + wheel 2
@@ -22,7 +22,7 @@ with suppress_stdout():
     wheel_data, steering_data = urdf_writer.add_wheel_module(wheel_filename='concert/module_wheel_concert.json', 
                                         steering_filename='concert/module_steering_concert_fr_rl.json', 
                                         angle_offset=0.0)
-    homing_joint_map[str(steering_data['lastModule_name'])] = {'angle': -1.57}
+    homing_joint_map[str(steering_data['lastModule_name'])] = {'angle': 0.0}
     homing_joint_map[str(wheel_data['lastModule_name'])] = {'angle': 0.0}
 
     # leg + wheel 3
@@ -30,7 +30,7 @@ with suppress_stdout():
     wheel_data, steering_data = urdf_writer.add_wheel_module(wheel_filename='concert/module_wheel_concert.json', 
                                         steering_filename='concert/module_steering_concert_fr_rl.json', 
                                         angle_offset=0.0)
-    homing_joint_map[str(steering_data['lastModule_name'])] = {'angle': -1.57}
+    homing_joint_map[str(steering_data['lastModule_name'])] = {'angle': 0.0}
     homing_joint_map[str(wheel_data['lastModule_name'])] = {'angle': 0.0}
 
     # leg + wheel 4
@@ -38,7 +38,7 @@ with suppress_stdout():
     wheel_data, steering_data = urdf_writer.add_wheel_module(wheel_filename='concert/module_wheel_concert.json', 
                                         steering_filename='concert/module_steering_concert_fl_rr.json', 
                                         angle_offset=0.0)
-    homing_joint_map[str(steering_data['lastModule_name'])] = {'angle': 1.57}
+    homing_joint_map[str(steering_data['lastModule_name'])] = {'angle': 0.0}
     homing_joint_map[str(wheel_data['lastModule_name'])] = {'angle': 0.0}
 
     # manipulator
