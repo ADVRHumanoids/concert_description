@@ -41,7 +41,6 @@ xbotcore_plugins:
 
 # additional parameters that don't relate to any plugin
 xbotcore_param:
-  /xbotcore/joint_safety/filter_autostart: {value: true, type: bool}
-  /xbotcore/joint_safety/filter_cutoff_hz: {value: 2.0, type: double}
-  # /xbotcore/joint_safety/enable_safety: {value: false, type: bool}
+  /xbot/hal/joint_safety/filter_autostart: {value: true, type: bool}
+  /xbot/hal/joint_safety/filter_cutoff_hz: {value: 2.0, type: double}
 
