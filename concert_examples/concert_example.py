@@ -63,7 +63,7 @@ with suppress_stdout():
     #data = urdf_writer.add_module('concert/module_link_straight_20_concert.json', 0, False)
 
     # J4
-    data = urdf_writer.add_module('concert/module_joint_elbow_B_concert.json', 0, False)
+    data = urdf_writer.add_module('concert/module_joint_elbow_A_concert.json', 0, False)
     homing_joint_map[str(data['lastModule_name'])] = {'angle': 0.5}
 
     # J5
@@ -71,8 +71,8 @@ with suppress_stdout():
     homing_joint_map[str(data['lastModule_name'])] = {'angle': 0.0}
 
     # J6
-    # data = urdf_writer.add_module('concert/module_joint_elbow_concert.json', 0, False)
-    # homing_joint_map[str(data['lastModule_name'])] = {'angle': -0.5}
+    data = urdf_writer.add_module('concert/module_joint_elbow_B_concert.json', 0, False)
+    homing_joint_map[str(data['lastModule_name'])] = {'angle': -0.5}
 
     # gripper
     urdf_writer.add_simple_ee(0.0, 0.0, 0.2, 0.0)
