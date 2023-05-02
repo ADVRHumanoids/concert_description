@@ -10,6 +10,7 @@
     <!-- modular configuration parameters -->
     <arg name="realsense" default="false"/>
     <arg name="velodyne" default="false"/>
+    <arg name="ultrasound" default="false"/>
     <arg name="use_gpu_ray" default="false"/>
 
     <!-- gazebo configuration parameters -->
@@ -47,16 +48,22 @@
                                                     -a gazebo_urdf:=true
                                                         realsense:=$(arg realsense)
                                                         velodyne:=$(arg velodyne)
+                                                        ultrasound:=$(arg ultrasound)
                                                         use_gpu_ray:=$(arg use_gpu_ray)
                                                     -r modularbot_gz"/>
 
+    <!-- In the XBot urdf realsense and velodyne args should be 'false' otherwise the Gazebo plugin will be included.
+    We keep it like this so to have also in simulation all the frames from cameras and lidars.
+    To be able to remove the gazebo plugins from the XBot urdf we should modify (fork) the repos of realsense and velodyne -->
     <param name="robot_description_xbot" 
         command="python3 $(arg modular_description) -o urdf 
                                                     -a gazebo_urdf:=false
                                                         realsense:=$(arg realsense)
                                                         velodyne:=$(arg velodyne)
+                                                        ultrasound:=false
                                                         use_gpu_ray:=$(arg use_gpu_ray)
                                                     -r modularbot"/>
+        
 
     <param name="robot_description_semantic" 
         command="python3 $(arg modular_description) -o srdf"/>

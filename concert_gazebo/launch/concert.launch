@@ -10,6 +10,7 @@
     <!-- modular configuration parameters -->
     <arg name="realsense" default="false"/>
     <arg name="velodyne" default="false"/>
+    <arg name="ultrasound" default="false"/>
     <arg name="use_gpu_ray" default="false"/>
 
     <!-- gazebo configuration parameters -->
