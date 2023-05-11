@@ -75,6 +75,8 @@ with suppress_stdout():
     homing_joint_map[str(data['lastModule_name'])] = {'angle': -0.5}
 
     # gripper
-    urdf_writer.add_simple_ee(0.0, 0.0, 0.2, 0.0)
+    #urdf_writer.add_simple_ee(0.0, 0.0, 0.2, 0.0)
+    data = urdf_writer.add_module('concert/passive_end_effector_panel.json', 0, False)
+
 
 write_file_to_stdout(urdf_writer, homing_joint_map)
