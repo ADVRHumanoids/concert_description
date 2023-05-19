@@ -24,7 +24,7 @@ base:
   type: Cartesian
   distal_link: mobile_base
   lambda: 0.1
-  name: base_link
+  name: mobile_base
   
 postural:
   type: Postural
