@@ -13,6 +13,7 @@
     <arg name="world_frame_link" default="!"/>
     <arg name="solution_topic" default="!"/>
     <arg name="enable_otg" default="true"/>
+    <arg name="cartesian_ns" default="cartesian"/>
     
     <param name="cartesian/problem_description" 
         textfile="$(arg ik)"/>
@@ -39,13 +40,15 @@
             <param name="solver" value="OpenSot"/>
             <param name="rate" value="$(arg rate)"/>
             <param name="tf_prefix" value="$(arg tf_prefix)"/>
+            <param name="cartesian_ns" value="$(arg cartesian_ns)"/>
             <param if="$(eval arg('world_frame_link') != '!')" name="world_frame_link" value="$(arg world_frame_link)"/>
-            <remap if="$(eval arg('solution_topic') != '!')" from="cartesian/solution" to="$(arg solution_topic)"/>
+            <remap if="$(eval arg('solution_topic') != '!')" from="$(arg cartesian_ns)/solution" to="$(arg solution_topic)"/>
 
         </node>
 
         <node if="$(arg markers)" pkg="cartesian_interface" type="marker_spawner" name="interactive_markers" output="screen">
             <param name="tf_prefix" value="$(arg tf_prefix)"/>
+            <param name="ns" value="$(arg cartesian_ns)"/>
         </node>
 
     </group>
