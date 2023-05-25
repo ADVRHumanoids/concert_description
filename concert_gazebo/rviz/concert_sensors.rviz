@@ -8,7 +8,7 @@ Panels:
         - /Status1
         - /Grid1
       Splitter Ratio: 0.5
-    Tree Height: 555
+    Tree Height: 839
   - Class: rviz/Selection
     Name: Selection
   - Class: rviz/Tool Properties
@@ -271,17 +271,7 @@ Visualization Manager:
           Show Axes: false
           Show Trail: false
           Value: true
-        L_2_link_1_E:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
         L_3_E:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        L_3_link_1_E:
           Alpha: 1
           Show Axes: false
           Show Trail: false
@@ -384,43 +374,35 @@ Visualization Manager:
           Show Axes: false
           Show Trail: false
           Value: true
+        VLP16_lidar_back:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        VLP16_lidar_back_base_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        VLP16_lidar_front:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        VLP16_lidar_front_base_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
         base_link:
           Alpha: 1
           Show Axes: false
           Show Trail: false
-        bosch_uss5_back_left:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        bosch_uss5_back_right:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        bosch_uss5_front_left:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        bosch_uss5_front_right:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        bosch_uss5_left_back:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        bosch_uss5_left_front:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        bosch_uss5_right_back:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        bosch_uss5_right_front:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
         ee_E:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        end_effector_E:
           Alpha: 1
           Show Axes: false
           Show Trail: false
@@ -430,26 +412,70 @@ Visualization Manager:
           Show Axes: false
           Show Trail: false
           Value: true
-        velodyne_back:
+        ultrasound_fl_lat:
           Alpha: 1
           Show Axes: false
           Show Trail: false
-          Value: true
-        velodyne_back_base_link:
+        ultrasound_fl_lat_base_link:
           Alpha: 1
           Show Axes: false
           Show Trail: false
-          Value: true
-        velodyne_front:
+        ultrasound_fl_sag:
           Alpha: 1
           Show Axes: false
           Show Trail: false
-          Value: true
-        velodyne_front_base_link:
+        ultrasound_fl_sag_base_link:
           Alpha: 1
           Show Axes: false
           Show Trail: false
-          Value: true
+        ultrasound_fr_lat:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        ultrasound_fr_lat_base_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        ultrasound_fr_sag:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        ultrasound_fr_sag_base_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        ultrasound_rl_lat:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        ultrasound_rl_lat_base_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        ultrasound_rl_sag:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        ultrasound_rl_sag_base_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        ultrasound_rr_lat:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        ultrasound_rr_lat_base_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        ultrasound_rr_sag:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        ultrasound_rr_sag_base_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
         wheel_A:
           Alpha: 1
           Show Axes: false
@@ -539,8 +565,8 @@ Visualization Manager:
     - Alpha: 1
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
-        Max Value: 0.2404392659664154
-        Min Value: -0.7531472444534302
+        Max Value: 0.21337836980819702
+        Min Value: -0.7516553997993469
         Value: true
       Axis: Z
       Channel Name: intensity
@@ -559,7 +585,7 @@ Visualization Manager:
       Size (Pixels): 3
       Size (m): 0.009999999776482582
       Style: Flat Squares
-      Topic: /velodyne_back_points
+      Topic: /VLP16_lidar_back/velodyne_points
       Unreliable: false
       Use Fixed Frame: true
       Use rainbow: true
@@ -567,8 +593,8 @@ Visualization Manager:
     - Alpha: 1
       Autocompute Intensity Bounds: true
       Autocompute Value Bounds:
-        Max Value: 0.18777164816856384
-        Min Value: -0.7516286373138428
+        Max Value: 0.2156069576740265
+        Min Value: -0.7523969411849976
         Value: true
       Axis: Z
       Channel Name: intensity
@@ -587,10 +613,90 @@ Visualization Manager:
       Size (Pixels): 3
       Size (m): 0.009999999776482582
       Style: Flat Squares
-      Topic: /velodyne_front_points
+      Topic: /VLP16_lidar_front/velodyne_points
       Unreliable: false
       Use Fixed Frame: true
       Use rainbow: true
+      Value: true
+    - Alpha: 0.5
+      Buffer Length: 1
+      Class: rviz/Range
+      Color: 255; 255; 255
+      Enabled: true
+      Name: Range
+      Queue Size: 10
+      Topic: /bosch_uss5/ultrasound_fl_lat
+      Unreliable: false
+      Value: true
+    - Alpha: 0.5
+      Buffer Length: 1
+      Class: rviz/Range
+      Color: 255; 255; 255
+      Enabled: true
+      Name: Range
+      Queue Size: 10
+      Topic: /bosch_uss5/ultrasound_fl_sag
+      Unreliable: false
+      Value: true
+    - Alpha: 0.5
+      Buffer Length: 1
+      Class: rviz/Range
+      Color: 255; 255; 255
+      Enabled: true
+      Name: Range
+      Queue Size: 10
+      Topic: /bosch_uss5/ultrasound_fr_lat
+      Unreliable: false
+      Value: true
+    - Alpha: 0.5
+      Buffer Length: 1
+      Class: rviz/Range
+      Color: 255; 255; 255
+      Enabled: true
+      Name: Range
+      Queue Size: 10
+      Topic: /bosch_uss5/ultrasound_fr_sag
+      Unreliable: false
+      Value: true
+    - Alpha: 0.5
+      Buffer Length: 1
+      Class: rviz/Range
+      Color: 255; 255; 255
+      Enabled: true
+      Name: Range
+      Queue Size: 10
+      Topic: /bosch_uss5/ultrasound_rl_lat
+      Unreliable: false
+      Value: true
+    - Alpha: 0.5
+      Buffer Length: 1
+      Class: rviz/Range
+      Color: 255; 255; 255
+      Enabled: true
+      Name: Range
+      Queue Size: 10
+      Topic: /bosch_uss5/ultrasound_rl_sag
+      Unreliable: false
+      Value: true
+    - Alpha: 0.5
+      Buffer Length: 1
+      Class: rviz/Range
+      Color: 255; 255; 255
+      Enabled: true
+      Name: Range
+      Queue Size: 10
+      Topic: /bosch_uss5/ultrasound_rr_lat
+      Unreliable: false
+      Value: true
+    - Alpha: 0.5
+      Buffer Length: 1
+      Class: rviz/Range
+      Color: 255; 255; 255
+      Enabled: true
+      Name: Range
+      Queue Size: 10
+      Topic: /bosch_uss5/ultrasound_rr_sag
+      Unreliable: false
       Value: true
   Enabled: true
   Global Options:
@@ -620,7 +726,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 5.85242223739624
+      Distance: 16.408554077148438
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -628,25 +734,25 @@ Visualization Manager:
         Value: false
       Field of View: 0.7853981852531433
       Focal Point:
-        X: -1.1358305215835571
-        Y: -2.169234037399292
-        Z: 1.2249200344085693
+        X: -0.6073064208030701
+        Y: 0.03444206714630127
+        Z: 1.2027359008789062
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.22539854049682617
+      Pitch: 0.4197951555252075
       Target Frame: <Fixed Frame>
-      Yaw: 4.2217559814453125
+      Yaw: 5.308096885681152
     Saved: ~
 Window Geometry:
   Displays:
-    collapsed: true
-  Height: 846
-  Hide Left Dock: true
+    collapsed: false
+  Height: 1136
+  Hide Left Dock: false
   Hide Right Dock: true
-  QMainWindow State: 000000ff00000000fd000000040000000000000156000002b4fc0200000008fb0000001200530065006c0065006300740069006f006e00000001e10000009b0000005c00fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c006100790073000000003b000002b4000000c700fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261000000010000010f000002b4fc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a00560069006500770073000000003b000002b4000000a000fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000004b00000003efc0100000002fb0000000800540069006d00650100000000000004b00000030700fffffffb0000000800540069006d00650100000000000004500000000000000000000004b0000002b400000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  QMainWindow State: 000000ff00000000fd000000040000000000000156000003d2fc0200000008fb0000001200530065006c0065006300740069006f006e00000001e10000009b0000005c00fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c006100790073010000003d000003d2000000c900fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261000000010000010f000002b4fc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a00560069006500770073000000003b000002b4000000a400fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000007380000003efc0100000002fb0000000800540069006d0065010000000000000738000003bc00fffffffb0000000800540069006d00650100000000000004500000000000000000000005dc000003d200000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
   Selection:
     collapsed: false
   Time:
@@ -655,6 +761,6 @@ Window Geometry:
     collapsed: false
   Views:
     collapsed: true
-  Width: 1200
-  X: 557
-  Y: 139
+  Width: 1848
+  X: 72
+  Y: 27
