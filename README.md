@@ -78,9 +78,9 @@ mon launch concert_gazebo concert.launch [rviz:=true]
 ![MicrosoftTeams-image (4)](https://user-images.githubusercontent.com/22152172/209342651-12d59ce9-7d62-43fe-8a55-970304862c75.png)
 
 *Note*: For selecting to simulate **sensors** or not, the launch file accepts also a series of additional arguments. 
-For example to run a simulation that will load also the gazebo plugins for the **Realsense cameras** and the **Velodyne lidars** run:
+For example to run a simulation that will load also the gazebo plugins for the **Realsense cameras**, the **Velodyne lidars** and the **ultrasound sensors** run:
 ```
-mon launch concert_gazebo concert.launch realsense:=true velodyne:=true
+mon launch concert_gazebo concert.launch realsense:=true velodyne:=true ultrasound:=true
 ```
 You'll need to have the proper dependencies installed in your setup in order for sensor simulation to work. See the [forest recipe for this package](https://github.com/ADVRHumanoids/multidof_recipes/blob/master/recipes/concert_description.yaml).
 
@@ -122,6 +122,17 @@ forest grow centauro_cartesio
 rosservice call /cartesian/base_link/set_control_mode velocity
 ```
 Upon succesful return, you can move the base by *continuously* sending velocity commands to the topic `/cartesian/base_link/velocity_reference`; note that the `msg.header.frame_id` field of the published messages can be usefully set to `base_link` in order to have the commanded twist interpreted w.r.t. the local frame.
+
+## Deploy instructions
+
+When launching the simulation environment (`mon launch concert_gazebo concert.launch`) a Python file is used to generate the robot model and write the URDF, SRDF, etc. By default this file is the `concert_example.py` script in `concert_examples`, although it can be changed by passing the path to another script to the `modular_description` argument of the launch file.
+
+Executing the Python script, the required files will be generated in the `/tmp` folder and will be used by Gazebo, XBot2, etc. To save these files in a non-temporary folder the **deploy** argument can be passed to the Python script. For instance running:
+```
+roscd concert_examples
+python3 concert_example.py --deploy ~/concert_ws/ros_src/ --robot-name my_concert_package
+```
+will deploy a **ROS package** called `my_concert_package` in the `~/concert_ws/ros_src` directory. This can now be used as an independent ROS package, that can be shared or stored as usual.
 
 ## Further documentation
 
