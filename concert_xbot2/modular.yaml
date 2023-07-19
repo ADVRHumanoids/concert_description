@@ -25,14 +25,22 @@ xbotcore_threads:
   
 # define plugins to be loaded
 xbotcore_plugins:
-  # this plugin is shipped with xbot2, and it generates the
-  # ROS api for the framework
-  # it is not designed to be real-time safe, so it must executed
-  # inside a thread with `other` priority
+
   ros_io: { thread: nrt_main, type: ros_io }
+
   ros_ctrl: { thread: nrt_main, type: ros_control }
 
-  # a simple homing module
+  omnisteering:
+    thread: nrt_main
+    type: omnisteering_controller_plugin
+    params:
+      wheel_names:
+        value: [wheel_A, wheel_B, wheel_C, wheel_D]
+        type: vector<string>
+      wheel_radius:
+        value: [0.16, 0.16, 0.16, 0.16]
+        type: vector<double>
+
   homing:
     thread: rt_main
     type: homing
