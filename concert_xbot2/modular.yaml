@@ -51,4 +51,5 @@ xbotcore_plugins:
 xbotcore_param:
   /xbot/hal/joint_safety/filter_autostart: {value: true, type: bool}
   /xbot/hal/joint_safety/filter_cutoff_hz: {value: 2.0, type: double}
+  /xbot/ros_support/ros_args: {value: [/omnisteering/cmd_vel:=/cmd_vel], type: vector<string>}
 
