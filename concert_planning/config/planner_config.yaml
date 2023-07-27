@@ -1,0 +1,32 @@
+aruco_wrapper:
+  boxes:
+    fiducial_1:
+      size: [0.32, 0.17, 0.32]
+      center: [0, 0, -0.16]
+    # - fiducial_1:
+    #     size: [0.5, 0.75, 0.5]
+    #     center: [0., -0.46, -0.15]
+    # fiducial_1:
+    #   size: [1.2, 0.6, 0.4]
+    #   center: [0, 0.20, -0.20]
+
+  grasp:
+    arm1_8: 
+      base_frame: fiducial_1
+      offset: 
+        pos: [0.30, 0, 0.0]
+    arm2_8: 
+      base_frame: fiducial_1
+      offset: 
+        pos: [-0.30, 0, -0.0]
+    dagana_2_top_link: 
+      base_frame: fiducial_1
+      offset: 
+        # pos: [-0.40, 0, -0.0666]
+        # rot: [0, 0.7071068, 0, 0.7071068]
+        pos: [0, 0.075, 0.4]
+        rot: [0, 1, 0, 0]
+
+validity_check:
+  planning_scene:
+    padding: 0.03
