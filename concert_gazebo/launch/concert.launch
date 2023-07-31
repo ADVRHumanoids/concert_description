@@ -4,6 +4,9 @@
     <arg name="gazebo" default="true"/>
     <arg name="xbot2" default="true"/>
 
+    <!-- Xbot2 configuration -->
+    <arg name="xbot2_config" default="$(find concert_xbot2)/modular.yaml"/>
+
     <!-- modular configuration -->
     <arg name="modular_description" default="$(find concert_examples)/concert_example.py"/>
 
