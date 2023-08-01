@@ -93,6 +93,9 @@ class Planner:
         self.vc.planning_scene.startMonitor()
         self.vc.planning_scene.startGetPlanningSceneServer()
 
+        # empty planner
+        self.planner = None
+
         
 
 
@@ -127,7 +130,11 @@ class Planner:
         self.model.update()
         self.constr.reset()
         self.constr.function(self.qstart)
-        self.qstart = self.constr.project(self.qstart)
+
+        try:
+            self.qstart = self.constr.project(self.qstart)
+        except:
+            print('failed to project qstart onto goal manifold')
 
         # publish start markers
         self.model.setJointPosition(self.qstart)
@@ -208,49 +215,68 @@ class Planner:
                 return
 
 
-    def plan(self, planner_type='RRTstar', timeout=1.0, threshold=0.0):
+    def plan(self, planner_type='RRTstar', timeout=1.0, threshold=0.0, trj_length=100):
 
-        # create planner
-        planner_config = {
-            'state_space': {
-                'type': 'Atlas', 
-                'rho': 2.0,
-                'epsilon': 0.1,
-                'exploration': 0.5,
-                'alpha': math.pi/16.
-                }
-        }
+        if self.planner is None:
+
+            # create planner
+            planner_config = {
+                'state_space': {
+                    'type': 'Atlas', 
+                    'rho': 2.0,
+                    'epsilon': 0.1,
+                    'exploration': 0.8,
+                    'alpha': math.pi/16.
+                    }
+            }
+
+            planner = planning.OmplPlanner(
+                self.constr,
+                self.qmin, self.qmax,
+                yaml.dump(planner_config)
+            )
+
+            self.planner = planner
+
+            # define state validator
+            def validity_predicate(q):
+                self.model.setJointPosition(q)
+                self.model.update()
+                self.plan_viz.publishMarkers([])
+                return self.nspg.vc.checkAll()
+
+            planner.setStateValidityPredicate(validity_predicate)
 
         
+        planner = self.planner
 
-        planner = planning.OmplPlanner(
-            self.constr,
-            self.qmin, self.qmax,
-            yaml.dump(planner_config)
-        )
-
-        # self.constr.reset()
-        # self.qstart = self.constr.project(self.qstart)        
-
-        ### TODO: add check for start and goal state w.r.t. the manifold
+        # set start and goal
+        print(f'manifold error: start {self.constr.function(self.qstart)}, goal {self.constr.function(self.qstart)}')
         planner.setStartAndGoalStates(self.qstart, self.qgoal, threshold)
 
-        # define state validator
-        def validity_predicate(q):
-            self.model.setJointPosition(q)
-            self.model.update()
-            self.plan_viz.publishMarkers([])
-            return self.nspg.vc.checkAll()
-
-        planner.setStateValidityPredicate(validity_predicate)
+        # solve
         success = planner.solve(timeout, planner_type)
 
         if success:
+
+            print('attempting to simplify plan..')
+            
+            if planner.simplifySolutionPath(1.0):
+                print('..ok')
+            else:
+                print('..failed')
+            
+            planner.interpolateSolutionPath(trj_length)
+
             solution = np.array(planner.getSolutionPath()).transpose()
+
             error = la.norm(solution[:, -1] - np.array(self.qgoal), ord=np.inf)
-            print(f'Plan error is {error} rad')
+            print(f'Plan error is {error} rad, trajectory length is {solution.shape[1]}')
+
             return solution, error
+        
         else:
+
             print(f'Plan failed')
             return None, np.inf
 
@@ -308,6 +334,7 @@ class Planner:
         seg_durs.insert(0, 0)
 
         times = np.cumsum(seg_durs)
+
 
         interpolators = []
         for i in range(qsize):

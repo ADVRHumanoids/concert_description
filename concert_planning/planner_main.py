@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 
+import rospy
+import numpy as np
+import scipy.io
+
 from cartesian_interface.pyci_all import *
 import cartesian_interface.roscpp_utils as roscpp
+from moveit_compute_default_collisions import pymcdc
 
 from planner import planner
-import rospy
-import rospkg
-import sys
-import yaml
 
-from moveit_compute_default_collisions import pymcdc
 
 # initialize rospy and roscpp
 rospy.init_node('planner_node', disable_signals=True)
@@ -37,8 +37,9 @@ pln.qmin[6:14] = 0
 pln.qmax[6:14] = 0
 
 # customize environment
-pln.vc.planning_scene.addBox('lasbarra', [0.1, 2.1, 0.1], Affine3(pos=[0.5, 0, 0.7]), 'base_link', '')
-pln.vc.planning_scene.addBox('cilindrozzo', [0.1, 0.1, 0.2], Affine3(pos=[0, 0, 0.1]), 'ee_E', 'ee_E')
+pln.vc.planning_scene.addBox('lasbarra', [0.1, 2.1, 0.1], Affine3(pos=[0.5, 0, 0.7]), 'base_link')
+pln.vc.planning_scene.addBox('cilindrozzo', [0.15, 0.15, 0.2], Affine3(pos=[0, 0, 0.15]), 'ee_E', 'ee_E')
+pln.vc.planning_scene.addCylinder('cestino', 0.3, 1.0, Affine3(pos=[0, 0.8, -0.3]), 'base_link')
 
 # start q (usual 6dof pinoblu)
 pln.set_start_configuration([0]*14 + [0, -1.4, 0, 1.0, 0, -0.6])
@@ -60,16 +61,15 @@ pln.set_goal_configuration([0]*14 + [2.6, -1.4, 2.1, 1.75, -1.2, -2.0])
 # )
 
 # plan
-trj, error = pln.plan(timeout=5.0, planner_type='RRTConnect')
+plan_ok = False 
 
-if trj is None:
-    exit(1)
+while not plan_ok:  
+    trj, error = pln.plan(timeout=1.0, planner_type='RRTConnect', trj_length=1000)
+    plan_ok = error == 0
 
-# failure
-trj_interp, time_vect = pln.interpolate(trj, 0.01, 1, 10)
 
 # run twenty times on rviz
-pln.play_on_rviz(trj_interp, 20, time_vect[-1])
+pln.play_on_rviz(trj, 20, 5.0)
 
 # send to robot
 pln.play_on_robot(trj, 5)
