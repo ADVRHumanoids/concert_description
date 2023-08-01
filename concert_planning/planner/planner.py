@@ -1,6 +1,7 @@
 from cartesio_planning import planning
 from cartesio_planning import validity_check as vc
 from cartesio_planning import visual_tools
+from cartesio_planning import constraints
 
 from cartesian_interface.pyci_all import *
 
@@ -14,7 +15,9 @@ import numpy as np
 import scipy.linalg as la
 import scipy.interpolate as interpol
 import yaml
+
 import rospy
+from std_srvs.srv import Trigger
 from typing import Dict
 
 import math
@@ -47,7 +50,7 @@ class Planner:
         self.dynamic_links = ee_links
 
         # planner manifold
-        self.constr = manifold.make_constraint(self.model, self.static_links)
+        self.constr = None
 
         # define start configuration
         self.qstart = self._generate_start_pose()
@@ -79,8 +82,7 @@ class Planner:
                                               tf_prefix='planner/')
 
         
-        # create the goal sampler
-        self.nspg = nspg.GoalSampler(self.model, self.dynamic_links, self.static_links, self.vc)
+        
 
         # joint limits for the planner (clamped between -6 and 6 rad)
         qmin, qmax = self.model.getJointLimits()
@@ -96,7 +98,23 @@ class Planner:
         # empty planner
         self.planner = None
 
+        # service to play on robot
+        self.stop_play_on_rviz = False
+        self.srv = rospy.Service(f'/planner/play_on_robot', Trigger, self._stop_play_on_rviz)
+
+    
+    def set_constraint(self, constr_config):
+
+        cs_str = yaml.dump(constr_config)
+
+        cs_ci = pyci.CartesianInterface.MakeInstance('OpenSot', cs_str, self.model, 0.01)
+
+        self.constr = constraints.CartesianConstraint(cs_ci)
+
         
+    def _stop_play_on_rviz(self, req):
+        self.stop_play_on_rviz = True
+        return True, 'stopped playing on rviz'
 
 
     def _generate_start_pose(self):
@@ -118,6 +136,10 @@ class Planner:
     def set_start_configuration(self, qstart):
 
         self.qstart = qstart
+        if not self.model.setJointPosition(self.qstart):
+            raise RuntimeError('model.setJointPosition failed, invalid q')
+        self.model.update()
+        self.start_viz.publishMarkers([])
     
 
     def set_goal_configuration(self, qgoal):
@@ -128,14 +150,20 @@ class Planner:
         # from qgoal
         self.model.setJointPosition(self.qgoal)
         self.model.update()
-        self.constr.reset()
-        self.constr.function(self.qstart)
 
-        try:
-            self.qstart = self.constr.project(self.qstart)
-        except:
-            print('failed to project qstart onto goal manifold')
+        if self.constr is not None:
 
+            self.constr.reset()
+            
+            self.constr.function(self.qstart)
+
+            try:
+                qstart = self.constr.project(self.qstart)
+                self.qstart = np.clip(qstart, self.qmin, self.qmax)
+            except:
+                print('failed to project qstart onto goal manifold')
+
+        
         # publish start markers
         self.model.setJointPosition(self.qstart)
         self.model.update()
@@ -155,6 +183,9 @@ class Planner:
 
 
     def generate_goal_configuration(self, poses: Dict[str, Affine3], timeout=5):
+
+        # create the goal sampler
+        self.nspg = nspg.GoalSampler(self.model, self.dynamic_links, self.static_links, self.vc, self.qmin, self.qmax)
 
         # set references to goal sampler from detected aruco boxes
         self.nspg.set_references(poses.keys(), 
@@ -180,10 +211,13 @@ class Planner:
 
     def listen_to_goal(self):
 
-        # self.model.setJointPosition(self.qstart)
-        # self.model.update()
-        # self.nspg.reset()
 
+        # create the goal sampler
+        self.nspg = nspg.GoalSampler(self.model, self.dynamic_links, self.static_links, self.vc, self.qmin, self.qmax)
+
+        self.model.setJointPosition(self.qstart)
+        self.model.update()
+        
         while True:
             try:
                 self.nspg.rosapi.run()
@@ -192,9 +226,6 @@ class Planner:
             except KeyboardInterrupt:
                 # if not found, publish last attempt for debugging purposes
                 self.qgoal = self.model.getJointPosition()
-
-                self.model.update()
-                self.constr.reset()
 
                 self.set_goal_configuration(self.qgoal)
 
@@ -230,11 +261,21 @@ class Planner:
                     }
             }
 
-            planner = planning.OmplPlanner(
-                self.constr,
-                self.qmin, self.qmax,
-                yaml.dump(planner_config)
-            )
+            if self.constr is None:
+
+                planner = planning.OmplPlanner(
+                    self.qmin, self.qmax,
+                    yaml.dump(planner_config)
+                )
+
+            else:
+
+                planner = planning.OmplPlanner(
+                    self.constr,
+                    self.qmin, self.qmax,
+                    yaml.dump(planner_config)
+                )
+
 
             self.planner = planner
 
@@ -243,6 +284,8 @@ class Planner:
                 self.model.setJointPosition(q)
                 self.model.update()
                 self.plan_viz.publishMarkers([])
+
+                
                 return self.nspg.vc.checkAll()
 
             planner.setStateValidityPredicate(validity_predicate)
@@ -251,7 +294,6 @@ class Planner:
         planner = self.planner
 
         # set start and goal
-        print(f'manifold error: start {self.constr.function(self.qstart)}, goal {self.constr.function(self.qstart)}')
         planner.setStartAndGoalStates(self.qstart, self.qgoal, threshold)
 
         # solve
@@ -281,13 +323,17 @@ class Planner:
             return None, np.inf
 
 
-    def play_on_rviz(self, solution, ntimes, duration):
+    def play_on_rviz(self, solution, duration):
 
         # play solution a number of times...
         dt = duration / solution.shape[1]
 
-        for _ in range(ntimes):
+        self.stop_play_on_rviz = False
+
+        while True:
             for i in range(solution.shape[1]):
+                if self.stop_play_on_rviz:
+                    return
                 q = solution[:, i]
                 self.model.setJointPosition(q)
                 self.model.update()
@@ -300,14 +346,12 @@ class Planner:
         if self.robot is None:
             raise Exception('RobotInterface not available')
         self.robot.setControlMode(xbot.ControlMode.Position())
-        cin = input('send solution? (y/n)')
         dt = T / solution.shape[1]
-        if cin.lower() == 'y':
-            for i in range(solution.shape[1]):
-                q = solution[6:, i]
-                self.robot.setPositionReference(q)
-                self.robot.move()
-                rospy.sleep(dt)
+        for i in range(solution.shape[1]):
+            q = solution[6:, i]
+            self.robot.setPositionReference(q)
+            self.robot.move()
+            rospy.sleep(dt)
 
 
     def interpolate(self, solution, dt, max_qdot, max_qddot):
@@ -361,10 +405,11 @@ class Planner:
             print(f'collision detected with link {self.nspg.vc.planning_scene.getCollidingLinks()}')
             check = False
 
-        error = self.constr.function(q)
-        if np.linalg.norm(error) > 0.01:
-            print('configuration not on manifold')
-            check = False
+        if self.constr is not None:
+            error = self.constr.function(q)
+            if np.linalg.norm(error) > 0.01:
+                print('configuration not on manifold')
+                check = False
 
         return check
 

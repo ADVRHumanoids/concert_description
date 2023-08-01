@@ -33,12 +33,42 @@ pln = planner.Planner(name='concert',
                       ee_links=['ee_E'])
 
 # hack: fix wheels
-pln.qmin[6:14] = 0
-pln.qmax[6:14] = 0
+pln.qmin[:14] = 0
+pln.qmax[:14] = 0
+pln.nspg._nspg.setJointLimits(pln.qmin, pln.qmax)
+
+# set manifold
+cs_cfg = dict()
+
+cs_cfg['solver_options'] = {'regularization': 1e-2}
+
+cs_cfg['stack'] = [
+    ['base_link', 'ee_rot']  
+]
+
+cs_cfg['constraints'] = ['joint_limits']
+
+cs_cfg['joint_limits'] = {
+    'type': 'JointLimits',
+}
+
+cs_cfg['ee_rot'] = {
+    'type': 'Cartesian',
+    'distal_link': 'ee_E', 
+    'indices': [3, 4],
+}
+
+cs_cfg['base_link'] = {
+    'type': 'Cartesian',
+    'distal_link': 'base_link', 
+}
+
+pln.set_constraint(cs_cfg)
 
 # customize environment
-pln.vc.planning_scene.addBox('lasbarra', [0.1, 2.1, 0.1], Affine3(pos=[0.5, 0, 0.7]), 'base_link')
-pln.vc.planning_scene.addBox('cilindrozzo', [0.15, 0.15, 0.2], Affine3(pos=[0, 0, 0.15]), 'ee_E', 'ee_E')
+pln.vc.planning_scene.addBox(id='lasbarra', size=[0.1, 2.1, 0.1], pose=Affine3(pos=[0.5, 0, 0.7]), frame_id='base_link')
+pln.vc.planning_scene.addBox(id='cilindrozzo', size=[0.1, 0.1, 0.2], pose=Affine3(pos=[0, 0, 0.1]), frame_id='ee_E', 
+                             attach_to_link='ee_E', touch_links=['end_effector_E'])
 pln.vc.planning_scene.addCylinder('cestino', 0.3, 1.0, Affine3(pos=[0, 0.8, -0.3]), 'base_link')
 
 # start q (usual 6dof pinoblu)
@@ -61,17 +91,17 @@ pln.set_goal_configuration([0]*14 + [2.6, -1.4, 2.1, 1.75, -1.2, -2.0])
 # )
 
 # plan
-plan_ok = False 
+plan_ok = False
 
 while not plan_ok:  
-    trj, error = pln.plan(timeout=1.0, planner_type='RRTConnect', trj_length=1000)
+    trj, error = pln.plan(timeout=1.0, planner_type='RRTConnect', trj_length=10000)
     plan_ok = error == 0
 
 
 # run twenty times on rviz
-pln.play_on_rviz(trj, 20, 5.0)
+pln.play_on_rviz(trj, 5.0)
 
 # send to robot
-pln.play_on_robot(trj, 5)
+pln.play_on_robot(trj, 5.0)
 
 rospy.spin()
