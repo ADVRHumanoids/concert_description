@@ -284,9 +284,7 @@ class Planner:
                 self.model.setJointPosition(q)
                 self.model.update()
                 self.plan_viz.publishMarkers([])
-
-                
-                return self.nspg.vc.checkAll()
+                return self.vc.checkAll()
 
             planner.setStateValidityPredicate(validity_predicate)
 
@@ -401,7 +399,7 @@ class Planner:
         self.model.setJointPosition(q)
         self.model.update()
 
-        if not self.nspg.vc.checkAll():
+        if not self.vc.checkAll():
             print(f'collision detected with link {self.nspg.vc.planning_scene.getCollidingLinks()}')
             check = False
 
