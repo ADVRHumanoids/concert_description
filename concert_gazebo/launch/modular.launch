@@ -4,6 +4,9 @@
     <arg name="gazebo" default="true"/>
     <arg name="xbot2" default="true"/>
 
+    <!-- Xbot2 configuration -->
+    <arg name="xbot2_config" default="$(find concert_xbot2)/modular.yaml"/>
+
     <!-- modular configuration -->
     <arg name="modular_description" default="$(find concert_examples)/pino_6dof.py"/>
 
@@ -88,7 +91,7 @@
 
     <!-- run xbot2 -->
     <node if="$(arg xbot2)" pkg="concert_xbot2" type="xbot2_core" name="xbot2" output="screen"
-        args="--hw sim --simtime --config $(find concert_xbot2)/modular.yaml"/>
+        args="--hw sim --simtime --config $(arg xbot2_config)"/>
 
     
     <!-- run rviz -->
