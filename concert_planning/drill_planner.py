@@ -3,13 +3,19 @@
 import rospy
 import numpy as np
 import scipy.io
+import math
+import yaml
 
 from cartesian_interface.pyci_all import *
 import cartesian_interface.roscpp_utils as roscpp
 from moveit_compute_default_collisions import pymcdc
 
 from planner import planner
+from planner.drill_validity_check import DrillataValidityCheck
 
+from centauro_cartesio import simple_steering
+
+np.set_printoptions(precision=2, suppress=True)
 
 # initialize rospy and roscpp
 rospy.init_node('planner_node', disable_signals=True)
@@ -36,89 +42,65 @@ pln = planner.Planner(name='concert',
 pln.qmin[6:14] = 0
 pln.qmax[6:14] = 0
 
-pln.qmax[:6] = [2, 2, 0, 0, 0, 1.6]
+pln.qmax[:6] = [5, 5, 0, 0, 0, 1.6]
 pln.qmin[:6] = -pln.qmax[:6]
 
 # customize environment
 pln.vc.planning_scene.addBox(id='wall', size=[0.5, 5, 5], pose=Affine3(pos=[1.5, 0, 0.0]), frame_id='world')
 pln.vc.planning_scene.addBox(id='ground', size=[5, 5, 0.1], pose=Affine3(pos=[0.0, 0, -0.80]), frame_id='world')
+pln.vc.planning_scene.addCylinder('cestino', 0.3, 1.0, Affine3(pos=[0, 0, -0.3]), 'world')
 
 # start q (usual 6dof pinoblu)
-pln.set_start_configuration([0]*14 + [0.0, 0.1, 0.1, -0.1])
+pln.set_start_configuration([0, 1.0, 0, 0, 0, 0.0] + [0]*8 + [0.0, 1.4, 0, 2.8, 0, 1.4])
 
 # custom goal validity checker
-inside_drillata = False
+drill_checker = DrillataValidityCheck(pln=pln, drill_depth=0.20, max_torque=150.0)
 
-def drillata():
-
-    global inside_drillata
-
-    if inside_drillata:
-        return True
-    
-    print('DRILLATAHHHHHHHHHHHHHHHHH')
-
-    T_pre_drill = pln.nspg.ik.getDesiredPose('ee_E')
-    q_pre_drill = pln.model.getJointPosition()
-
-    T_post_drill = T_pre_drill.copy()
-    T_post_drill.translation[0] += 0.20
-    pln.nspg.ik.setDesiredPose('ee_E', T_post_drill)
-
-    print(T_pre_drill.translation)
-    print(T_post_drill.translation)
-    
-    if not pln.nspg.ik.solve():
-        print('ik: drillata fallita')
-        pln.nspg.ik.setDesiredPose('ee_E', T_pre_drill)
-        pln.model.setJointPosition(q_pre_drill)
-        pln.model.update()
-        return False
-
-    inside_drillata = True
-    q_post_drill_valid = pln.vc.checkAll()
-    inside_drillata = False
-
-    if not q_post_drill_valid:
-        print('collisioni: drillata fallita')
-
-    pln.nspg.ik.setDesiredPose('ee_E', T_pre_drill)
-    pln.model.setJointPosition(q_pre_drill)
-    pln.model.update()
-    return q_post_drill_valid
-
-
-# pln.vc.addChecker('drillata', drillata)
+pln.vc.addChecker('drillata', drill_checker.is_valid)
 
 # # goal q 
 # pln.set_goal_configuration([0]*14 + [2.6, -1.4, 2.1, 1.75, -1.2, -2.0])
 
-# listen to goal from interactive markers (needs marker spawner on namespace and tf_prefix 'planner')
-# -> rosrun cartesian_interface marker_spawner _ns:=planner _tf_prefix:=planner
-# ctrl+c to stop listening
-pln.listen_to_goal()
+# # listen to goal from interactive markers (needs marker spawner on namespace and tf_prefix 'planner')
+# # -> rosrun cartesian_interface marker_spawner _ns:=planner _tf_prefix:=planner
+# # ctrl+c to stop listening
+# pln.listen_to_goal()
 
-# pln.vc.removeChecker('drillata')
+# generate goal pose from detected aruco markers
+pln.generate_goal_configuration(
+    {
+        'ee_E': Affine3(pos=[1.0, -0.70, -0.50], rot=[0, 0.7, 0, 0.7])
+    },
+    timeout=10
+)
 
-
-# # generate goal pose from detected aruco markers
-# pln.generate_goal_configuration(
-#     {
-#         'ee_E': Affine3(pos=[1.13, 0.0, -0.08], rot=[0, 0.7, 0, 0.7])
-#     },
-#     timeout=10
-# )
+# remove this checker for planning
+pln.vc.removeChecker('drillata')
 
 # plan
 plan_ok = False
 
 while not plan_ok:  
-    trj, error = pln.plan(timeout=5.0, planner_type='PRMstar', trj_length=10000)
+    trj, error = pln.plan(timeout=5.0, planner_type='RRTConnect', trj_length=500)
     plan_ok = error == 0
 
+# post process trj
 
-# run twenty times on rviz
-pln.play_on_rviz(trj, 5.0)
+wheels = [f'wheel_{l}' for l in ['A', 'B', 'C', 'D']]
+T_trj = 5.0
+trj_interp, T_interp = pln.postprocess_solution(trj, T_trj, wheels, wheel_radius=0.16, velocity_limit=2.0)
+
+scipy.io.savemat('/tmp/drill_planner.mat', 
+                 {
+                     'trj': trj,
+                     'trj_interp': trj_interp,
+                     'T_trj': T_trj,
+                     'T_trj_interp': T_interp
+                 })
+
+
+# run on rviz
+pln.play_on_rviz(trj_interp, T_interp)
 
 # send to robot
 pln.play_on_robot(trj, 5.0)
