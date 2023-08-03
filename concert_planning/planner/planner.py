@@ -8,6 +8,8 @@ from cartesian_interface.pyci_all import *
 from xbot_interface import xbot_interface as xbot
 from xbot_interface import config_options as co
 
+from centauro_cartesio import simple_steering
+
 from . import nspg 
 from . import manifold 
 
@@ -104,6 +106,11 @@ class Planner:
 
     
     def set_constraint(self, constr_config):
+
+        constr_config['joint_limits']['limits'] = dict()
+        for i in range(self.model.getJointNum()):
+            jname = self.model.getEnabledJointNames()[i]
+            constr_config['joint_limits']['limits'][jname] = [float(self.qmin[i]), float(self.qmax[i])]
 
         cs_str = yaml.dump(constr_config)
 
@@ -215,6 +222,13 @@ class Planner:
         # create the goal sampler
         self.nspg = nspg.GoalSampler(self.model, self.dynamic_links, self.static_links, self.vc, self.qmin, self.qmax)
 
+        # def goal_cb():
+        #     self.nspg.rosapi.run()
+        #     print(self.model.getJointPosition())
+        #     print('goal_found')
+
+        # self.nspg._nspg.setIterationCallback(goal_cb)
+
         self.model.setJointPosition(self.qstart)
         self.model.update()
         
@@ -319,6 +333,51 @@ class Planner:
 
             print(f'Plan failed')
             return None, np.inf
+        
+
+    def postprocess_solution(self, trj, T_trj, wheel_names, wheel_radius, velocity_limit):
+
+        model = self.model
+        steering = [simple_steering.SimpleSteering(model, w) for w in wheel_names]
+        steering_joint_idx = [model.getDofIndex(st.getSteeringJointName()) for st in steering]
+        T_trj = 5.0
+        dt = T_trj/trj.shape[1]
+
+        # osc
+        osc = simple_steering.OmniSteeringController(model, wheel_names, [wheel_radius]*4, dt, 1e9)
+        trj_interp = [trj[:, 0]]
+
+        # print
+        print(steering_joint_idx)
+
+        for i in range(trj.shape[1] - 1):
+
+            # print(i, flush=True)
+            
+            qj = trj[:, i]
+            vj = (trj[:, i+1] - trj[:, i])/(dt)
+            
+            model.setJointPosition(qj)
+            model.setJointVelocity(vj)
+            model.update()
+
+            osc.update(use_base_vel_from_model=True)
+            qs = model.getJointPosition()
+            
+            # trj[:, i+1] = qs
+
+            qprev = trj_interp[-1]
+            vs = (qs - qprev)/dt
+            n_nodes_to_add = math.ceil(np.max(np.abs(vs) / velocity_limit))
+
+            for k in range(n_nodes_to_add):
+                qk = qprev + (k+1)/n_nodes_to_add*(qs - qprev)
+                trj_interp.append(qk)
+
+        trj_interp = np.vstack(trj_interp).T
+        T_interp = T_trj / trj.shape[1] * trj_interp.shape[1]
+
+        return trj_interp, T_interp
 
 
     def play_on_rviz(self, solution, duration):
@@ -338,6 +397,7 @@ class Planner:
                 self.plan_viz.publishMarkers([])
                 self.vc.checkAll()
                 rospy.sleep(dt)
+            rospy.sleep(1.0)
 
 
     def play_on_robot(self, solution, T):
