@@ -260,7 +260,7 @@ class Planner:
                 return
 
 
-    def plan(self, planner_type='RRTstar', timeout=1.0, threshold=0.0, trj_length=100):
+    def plan(self, planner_type='RRTstar', timeout=1.0, threshold=0.0, trj_length=None):
 
         if self.planner is None:
 
@@ -320,7 +320,8 @@ class Planner:
             else:
                 print('..failed')
             
-            planner.interpolateSolutionPath(trj_length)
+            if trj_length is not None:
+                planner.interpolateSolutionPath(trj_length)
 
             solution = np.array(planner.getSolutionPath()).transpose()
 
@@ -352,8 +353,6 @@ class Planner:
 
         for i in range(trj.shape[1] - 1):
 
-            # print(i, flush=True)
-            
             qj = trj[:, i]
             vj = (trj[:, i+1] - trj[:, i])/(dt)
             

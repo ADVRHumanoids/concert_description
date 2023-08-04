@@ -47,8 +47,9 @@ pln.qmin[:6] = -pln.qmax[:6]
 
 # customize environment
 pln.vc.planning_scene.addBox(id='wall', size=[0.5, 5, 5], pose=Affine3(pos=[1.5, 0, 0.0]), frame_id='world')
-pln.vc.planning_scene.addBox(id='ground', size=[5, 5, 0.1], pose=Affine3(pos=[0.0, 0, -0.80]), frame_id='world')
+pln.vc.planning_scene.addBox(id='ground', size=[5, 5, 0.1], pose=Affine3(pos=[0.0, 0, -0.88]), frame_id='world')
 pln.vc.planning_scene.addCylinder('cestino', 0.3, 1.0, Affine3(pos=[0, 0, -0.3]), 'world')
+# pln.vc.planning_scene.setPadding(0.05)
 
 # start q (usual 6dof pinoblu)
 pln.set_start_configuration([0, 1.0, 0, 0, 0, 0.0] + [0]*8 + [0.0, 1.4, 0, 2.8, 0, 1.4])
@@ -69,7 +70,7 @@ pln.vc.addChecker('drillata', drill_checker.is_valid)
 # generate goal pose from detected aruco markers
 pln.generate_goal_configuration(
     {
-        'ee_E': Affine3(pos=[1.0, -0.70, -0.50], rot=[0, 0.7, 0, 0.7])
+        'ee_E': Affine3(pos=[0.9, -0.70, -0.50], rot=[0, 0.7, 0, 0.7])
     },
     timeout=10
 )
@@ -80,12 +81,24 @@ pln.vc.removeChecker('drillata')
 # plan
 plan_ok = False
 
+# 
 while not plan_ok:  
-    trj, error = pln.plan(timeout=5.0, planner_type='RRTConnect', trj_length=500)
+    trj, error = pln.plan(timeout=5.0, planner_type='RRTConnect', trj_length=100)
     plan_ok = error == 0
 
-# post process trj
 
+trj_raw = trj.copy()
+
+#######################
+
+from planner.to_smoothing import smooth
+
+trj = smooth(trj=trj, model=pln.model, validity_checker=pln.vc)
+
+#######################
+
+
+# post process trj
 wheels = [f'wheel_{l}' for l in ['A', 'B', 'C', 'D']]
 T_trj = 5.0
 trj_interp, T_interp = pln.postprocess_solution(trj, T_trj, wheels, wheel_radius=0.16, velocity_limit=2.0)
@@ -93,6 +106,7 @@ trj_interp, T_interp = pln.postprocess_solution(trj, T_trj, wheels, wheel_radius
 scipy.io.savemat('/tmp/drill_planner.mat', 
                  {
                      'trj': trj,
+                     'trj_raw': trj_raw,
                      'trj_interp': trj_interp,
                      'T_trj': T_trj,
                      'T_trj_interp': T_interp
@@ -100,7 +114,7 @@ scipy.io.savemat('/tmp/drill_planner.mat',
 
 
 # run on rviz
-pln.play_on_rviz(trj_interp, T_interp)
+pln.play_on_rviz(trj, T_interp)
 
 # send to robot
 pln.play_on_robot(trj, 5.0)
