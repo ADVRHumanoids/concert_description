@@ -46,6 +46,39 @@ xbotcore_plugins:
     type: homing
     params:
       time: { value: 5.0, type: double }
+  
+  cartesio_imp:
+        thread: rt_main
+        type: albero_cartesio_rt
+        params:
+            enabled_chains:
+                value: [chain_E]
+                type: vector<string>
+            problem_description:
+                value: $PWD/ModularBot_impedance_config.yaml
+                type: file
+            solver: {value: AlberoImpedance, type: string}
+            enable_feedback: {value: true, type: bool}
+            fc_map: {value: {low: 0.9, high: 0.95}, type: map<double>}
+            use_payload_estimator:
+              value: true  # note: keep false if you care to live
+              type: bool
+            payload_estimator_link:
+              value: ee_E
+              type: string
+  
+  force_follow_me:
+        type: force_follow_me
+        thread: nrt_main
+        params:
+          max_force: { value: 65.0, type: double }
+          max_lin_velocity:  { value: 0.77, type: double }
+          max_ang_velocity:  { value: 0.70, type: double }
+          force_threshold: { value: 9.5, type: double }
+        remap:
+          cmd_vel_V6: omnisteering/cmd_vel_V6
+
+
 
 # additional parameters that don't relate to any plugin
 xbotcore_param:
