@@ -33,9 +33,8 @@ pln = planner.Planner(name='concert',
                       ee_links=['ee_E'])
 
 # hack: fix wheels
-pln.qmin[:14] = 0
-pln.qmax[:14] = 0
-pln.nspg._nspg.setJointLimits(pln.qmin, pln.qmax)
+pln.qmin[6:14] = 0
+pln.qmax[6:14] = 0
 
 # set manifold
 cs_cfg = dict()
@@ -43,7 +42,10 @@ cs_cfg = dict()
 cs_cfg['solver_options'] = {'regularization': 1e-2}
 
 cs_cfg['stack'] = [
-    ['base_link', 'ee_rot']  
+    [
+        'ee_rot', 
+        'base_link',
+        ]  
 ]
 
 cs_cfg['constraints'] = ['joint_limits']
@@ -91,12 +93,13 @@ pln.set_goal_configuration([0]*14 + [2.6, -1.4, 2.1, 1.75, -1.2, -2.0])
 # )
 
 # plan
-plan_ok = False
+trj, error = pln.plan(timeout=5.0, planner_type='RRTConnect', trj_length=10000)
+plan_ok = error == 0
 
-while not plan_ok:  
-    trj, error = pln.plan(timeout=1.0, planner_type='RRTConnect', trj_length=10000)
-    plan_ok = error == 0
+if not plan_ok:
+    exit()
 
+print('done')
 
 # run twenty times on rviz
 pln.play_on_rviz(trj, 5.0)

@@ -314,14 +314,14 @@ class Planner:
         if success:
 
             print('attempting to simplify plan..')
+
+            if trj_length is not None:
+                planner.interpolateSolutionPath(trj_length)
             
             if planner.simplifySolutionPath(1.0):
                 print('..ok')
             else:
                 print('..failed')
-            
-            if trj_length is not None:
-                planner.interpolateSolutionPath(trj_length)
 
             solution = np.array(planner.getSolutionPath()).transpose()
 

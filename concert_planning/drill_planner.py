@@ -93,7 +93,7 @@ trj_raw = trj.copy()
 
 from planner.to_smoothing import smooth
 
-trj = smooth(trj=trj, model=pln.model, validity_checker=pln.vc)
+# trj = smooth(trj=trj, model=pln.model, validity_checker=pln.vc, max_iter=200)
 
 #######################
 
@@ -114,7 +114,7 @@ scipy.io.savemat('/tmp/drill_planner.mat',
 
 
 # run on rviz
-pln.play_on_rviz(trj, T_interp)
+pln.play_on_rviz(trj_interp, T_interp)
 
 # send to robot
 pln.play_on_robot(trj, 5.0)
