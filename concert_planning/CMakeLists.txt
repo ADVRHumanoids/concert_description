@@ -7,7 +7,12 @@ project(concert_planning)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED)
+find_package(catkin REQUIRED COMPONENTS
+         roscpp
+         eigen_conversions
+         tf tf_conversions)
+find_package(PCL REQUIRED)
+find_package(Eigen3 REQUIRED)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -113,7 +118,9 @@ catkin_package(
 ## Your package locations should be listed before other locations
 include_directories(
 # include
-# ${catkin_INCLUDE_DIRS}
+${catkin_INCLUDE_DIRS}
+${PCL_INCLUDE_DIRS}
+${EIGEN3_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
@@ -129,7 +136,16 @@ include_directories(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-# add_executable(${PROJECT_NAME}_node src/concert_planning_node.cpp)
+add_executable(point_cloud_manager_node
+    vision/point_cloud_manager_node.cpp
+    vision/point_cloud_manager.cpp
+)
+target_link_libraries(point_cloud_manager_node
+    ${catkin_LIBRARIES}
+    ${PCL_LIBRARIES}
+    ${EIGEN3_LIBRARIES}
+)
+
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -162,9 +178,9 @@ include_directories(
 
 ## Mark executables for installation
 ## See http://docs.ros.org/melodic/api/catkin/html/howto/format1/building_executables.html
-# install(TARGETS ${PROJECT_NAME}_node
-#   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-# )
+install(TARGETS point_cloud_manager_node
+    RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
 
 ## Mark libraries for installation
 ## See http://docs.ros.org/melodic/api/catkin/html/howto/format1/building_libraries.html
