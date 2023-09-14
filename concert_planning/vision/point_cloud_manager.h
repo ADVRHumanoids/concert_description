@@ -8,6 +8,8 @@
 #include <tf/transform_listener.h>
 #include <tf/transform_broadcaster.h>
 
+#include <geometry_msgs/PointStamped.h>
+
 class PointCloudManager
 {
 public:
@@ -17,6 +19,8 @@ public:
 
 private:
     void point_cloud_callback(const pcl::PointCloud<pcl::PointXYZ>::Ptr& msg);
+    void selected_point_cloud_callback(const pcl::PointCloud<pcl::PointXYZ>::Ptr& msg);
+    void clicked_point_callback(const geometry_msgs::PointStampedConstPtr& msg);
 
     void compute_normals(const double radius_search);
     void from_normals_to_marker_array(std::string frame_id = "");
@@ -24,12 +28,15 @@ private:
     void broadcast_tf(Eigen::Vector3d normal, std::string frame_id = "");
 
     ros::NodeHandle _nh;
-    ros::Subscriber _point_cloud_sub;
+    ros::Subscriber _point_cloud_sub, _selected_point_cloud_sub;
+    ros::Subscriber _clicked_point_sub;
     ros::Publisher _normals_pub;
     ros::Publisher _normal_marker_pub;
 
-    pcl::PointCloud<pcl::PointXYZ>::Ptr _point_cloud;
+    pcl::PointCloud<pcl::PointXYZ>::Ptr _point_cloud, _selected_point_cloud;
     pcl::PointCloud<pcl::Normal>::Ptr _normals;
+
+    geometry_msgs::PointStamped _clicked_point;
 
     tf::TransformListener _listener;
     tf::StampedTransform _transform;

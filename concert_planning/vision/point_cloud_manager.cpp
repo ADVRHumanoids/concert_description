@@ -14,10 +14,13 @@
 
 PointCloudManager::PointCloudManager(std::string input_topic):
 _point_cloud (new pcl::PointCloud<pcl::PointXYZ>),
+_selected_point_cloud (new pcl::PointCloud<pcl::PointXYZ>),
 _normals (new pcl::PointCloud<pcl::Normal>),
 _nh("point_cloud_manager_node")
 {
+    _selected_point_cloud_sub = _nh.subscribe("/selected_points", 1, &PointCloudManager::selected_point_cloud_callback, this);
     _point_cloud_sub = _nh.subscribe(input_topic, 1, &PointCloudManager::point_cloud_callback, this);
+    _clicked_point_sub = _nh.subscribe("/clicked_point", 1, &PointCloudManager::clicked_point_callback, this);
     _normals_pub = _nh.advertise<pcl::PointCloud<pcl::Normal>>("normals", 10, true);
     _normal_marker_pub = _nh.advertise<visualization_msgs::Marker>("normal_marker", 10, true);
 }
@@ -35,7 +38,7 @@ void PointCloudManager::update()
      ros::spinOnce();
 }
 
-void PointCloudManager::point_cloud_callback(const pcl::PointCloud<pcl::PointXYZ>::Ptr& msg)
+void PointCloudManager::selected_point_cloud_callback(const pcl::PointCloud<pcl::PointXYZ>::Ptr& msg)
 {
     try
     {
@@ -60,9 +63,49 @@ void PointCloudManager::point_cloud_callback(const pcl::PointCloud<pcl::PointXYZ
     sor.setStddevMulThresh (1.0);
     sor.filter(*pc);
 
-    pcl::transformPointCloud(*pc, *_point_cloud, b_T_cam.matrix());
+    pcl::transformPointCloud(*pc, *_selected_point_cloud, b_T_cam.matrix());
 
-    _point_cloud->header.frame_id = "base_link";
+    _selected_point_cloud->header.frame_id = "base_link";
+
+}
+
+
+void PointCloudManager::point_cloud_callback(const pcl::PointCloud<pcl::PointXYZ>::Ptr& msg)
+{
+    _point_cloud = msg;
+}
+
+void PointCloudManager::clicked_point_callback(const geometry_msgs::PointStampedConstPtr &msg)
+{
+    _clicked_point = *msg;
+
+    if (_point_cloud->empty())
+        return;
+
+    // create a PointCloud from the K nearest points around the clicked point
+    pcl::KdTreeFLANN<pcl::PointXYZ> kdtree;
+    kdtree.setInputCloud(_point_cloud);
+
+    pcl::PointXYZ pcl_clicked_point(msg->point.x, msg->point.y, msg->point.z);
+    float radius = 0.3;
+
+    std::vector<int> pointIdxRadiusSearch; //to store index of surrounding points
+    std::vector<float> pointRadiusSquaredDistance; // to store distance to surrounding points
+
+    if ( kdtree.radiusSearch (pcl_clicked_point, radius, pointIdxRadiusSearch, pointRadiusSquaredDistance) > 0 )
+    {
+        for (size_t i = 0; i < pointIdxRadiusSearch.size (); ++i)
+            std::cout << "    "  <<   _point_cloud->points[ pointIdxRadiusSearch[i] ].x
+                    << " " << _point_cloud->points[ pointIdxRadiusSearch[i] ].y
+                    << " " << _point_cloud->points[ pointIdxRadiusSearch[i] ].z
+                    << " (squared distance: " << pointRadiusSquaredDistance[i] << ")" << std::endl;
+    }
+
+    for (size_t i = 0; i < pointIdxRadiusSearch.size (); ++i)
+        _selected_point_cloud->points.push_back(_point_cloud->points[ pointIdxRadiusSearch[i] ]);
+    _selected_point_cloud->width = _selected_point_cloud->points.size ();
+    _selected_point_cloud->height = 1;
+    _selected_point_cloud->is_dense = true;
 
 }
 
