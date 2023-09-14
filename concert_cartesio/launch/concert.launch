@@ -15,19 +15,19 @@
     <arg name="enable_otg" default="true"/>
     <arg name="cartesian_ns" default="cartesian"/>
     
-    <param name="cartesian/problem_description" 
-        textfile="$(arg ik)"/>
-
-    <param name="cartesian/joint_blacklist" type="yaml" 
-        value="[J_wheel_A, J_wheel_B, J_wheel_C, J_wheel_D]"/>
-    
-    <param name="cartesian/velocity_whitelist" type="yaml" 
-        value="[J_wheel_A, J_wheel_B, J_wheel_C, J_wheel_D]"/>
 
     <group ns="$(arg namespace)">
 
-        <remap if="$(arg xbot)" from="robot_description" to="xbotcore/robot_description"/>
-        <remap if="$(arg xbot)" from="robot_description_semantic" to="xbotcore/robot_description_semantic"/>
+        <remap if="$(arg xbot)" from="robot_description" to="/xbotcore/robot_description"/>
+        <remap if="$(arg xbot)" from="robot_description_semantic" to="/xbotcore/robot_description_semantic"/>
+
+        <param name="cartesian/problem_description" textfile="$(arg ik)"/>
+
+        <param name="cartesian/joint_blacklist" type="yaml" 
+            value="[J_wheel_A, J_wheel_B, J_wheel_C, J_wheel_D, J1_E, J2_E, J3_E, J4_E, J5_E, J6_E]"/>
+        
+        <param name="cartesian/velocity_whitelist" type="yaml" 
+            value="[J_wheel_A, J_wheel_B, J_wheel_C, J_wheel_D]"/>
 
         <node pkg="cartesian_interface" type="ros_server_node"
                                         name="ros_server_node"
