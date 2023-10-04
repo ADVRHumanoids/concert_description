@@ -47,6 +47,12 @@ xbotcore_plugins:
     params:
       time: { value: 5.0, type: double }
 
+  gcomp:
+    thread: rt_main
+    type: gcomp_example
+    params: 
+      enabled_chains: [chain_E]
+
 # additional parameters that don't relate to any plugin
 xbotcore_param:
   /xbot/hal/joint_safety/filter_autostart: {value: true, type: bool}
