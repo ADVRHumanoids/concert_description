@@ -80,7 +80,7 @@ with suppress_stdout():
     # drill
     urdf_writer.add_module('concert/module_drill_concert.json', 0, False)
 
-    # drillbit
-    urdf_writer.add_simple_ee(z_offset=0.30, radius=0.01, name='drillbit')
+    ## drillbit
+    #urdf_writer.add_simple_ee(z_offset=0.30, radius=0.01, name='drillbit')
 
 write_file_to_stdout(urdf_writer, homing_joint_map)
