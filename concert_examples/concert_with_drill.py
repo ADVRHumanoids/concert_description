@@ -60,7 +60,7 @@ with suppress_stdout():
     homing_joint_map[data['lastModule_name']] = {'angle': 0.0}
 
     # add a 40cm passive link
-    data = urdf_writer.add_module('experimental/module_link_straight_30_concert.json', 0, False)
+    data = urdf_writer.add_module('concert/module_link_straight_30_concert.json', 0, False)
 
     # J4
     data = urdf_writer.add_module('concert/module_joint_elbow_A_concert.json', 0, False)
@@ -71,7 +71,7 @@ with suppress_stdout():
     homing_joint_map[str(data['lastModule_name'])] = {'angle': 0.0}
 
     # add a 40cm passive link
-    data = urdf_writer.add_module('experimental/module_link_straight_30_concert.json', 0, False)
+    data = urdf_writer.add_module('concert/module_link_straight_30_concert.json', 0, False)
 
     # J6
     data = urdf_writer.add_module('concert/module_joint_elbow_B_concert.json', 0, False)
@@ -80,7 +80,8 @@ with suppress_stdout():
     # drill
     urdf_writer.add_module('concert/module_drill_concert.json', 0, False)
 
-    ## drillbit
-    #urdf_writer.add_simple_ee(z_offset=0.30, radius=0.01, name='drillbit')
+    # drillbit
+    # urdf_writer.add_simple_ee(z_offset=0.30, radius=0.01, name='drillbit')
+    urdf_writer.add_drillbit(length=0.27, radius=0.012, mass=0.1)
 
 write_file_to_stdout(urdf_writer, homing_joint_map)
