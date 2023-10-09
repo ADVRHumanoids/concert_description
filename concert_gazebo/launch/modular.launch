@@ -69,7 +69,12 @@
         
 
     <param name="robot_description_semantic" 
-        command="python3 $(arg modular_description) -o srdf"/>
+        command="python3 $(arg modular_description) -o srdf -a gazebo_urdf:=false
+        realsense:=$(arg realsense)
+        velodyne:=$(arg velodyne)
+        ultrasound:=false
+        use_gpu_ray:=$(arg use_gpu_ray)
+    -r modularbot"/>
 
 
     <!-- run gazebo -->
