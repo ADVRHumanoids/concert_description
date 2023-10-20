@@ -80,6 +80,12 @@ xbotcore_plugins:
 
 
 
+  gcomp:
+    thread: rt_main
+    type: gcomp_example
+    params: 
+      enabled_chains: [chain_E]
+
 # additional parameters that don't relate to any plugin
 xbotcore_param:
   /xbot/hal/joint_safety/filter_autostart: {value: true, type: bool}
