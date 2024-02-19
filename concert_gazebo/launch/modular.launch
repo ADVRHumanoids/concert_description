@@ -96,7 +96,7 @@
 
     <!-- run xbot2 -->
     <node if="$(arg xbot2)" pkg="concert_xbot2" type="xbot2_core" name="xbot2" output="screen"
-        args="--hw sim --simtime --config $(arg xbot2_config)"/>
+        args="-V --hw sim --simtime --config $(arg xbot2_config) --"/>
 
     
     <!-- run rviz -->
