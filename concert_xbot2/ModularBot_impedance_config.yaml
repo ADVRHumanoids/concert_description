@@ -1,0 +1,38 @@
+# solver_options:
+#     regularization: 1e-6
+#     back_end: qpoases
+#     control_dt: 0.001
+# stack:
+#     -   - EE_1
+#         - EE_2
+stack:
+    - [EE]
+# constraints:
+#     ["JointLimits", "VelocityLimits"]
+# EE_1:
+#     type: Interaction
+#     base_link: L_0_A
+#     distal_link: ee_A
+# EE_2:
+#     type: Interaction
+#     base_link: L_0_B
+#     distal_link: ee_B
+EE:
+    type: Interaction
+    base_link: base_link
+    distal_link: ee_E
+    stiffness:
+        - 10000.0
+        - 10000.0
+        - 10000.0
+        - 1000.0
+        - 1000.0
+        - 1000.0
+    damping:
+        - 0.7
+        - 0.7
+        - 0.7
+        - 0.7
+        - 0.7
+        - 0.7
+    force_max: [100, 100, 100, 100, 100, 100]
