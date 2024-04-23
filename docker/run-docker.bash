@@ -1,6 +1,7 @@
 #!/bin/bash
 
-nvidia-docker run --rm -it --gpus all \
+docker run --runtime nvidia --rm -it --gpus all \
+ --env="NVIDIA_DRIVER_CAPABILITIES=all" \
  --env="DISPLAY=$DISPLAY" \
  --volume="/tmp/.X11-unix:/tmp/.X11-unix:rw" \
  --volume="$HOME/.ssh:/home/user/.ssh:ro" \
