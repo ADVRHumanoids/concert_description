@@ -53,6 +53,26 @@ xbotcore_plugins:
     params: 
       enabled_chains: [chain_E]
 
+  cartesio_imp: 
+    thread: rt_main 
+    type: albero_cartesio_rt
+    params:
+      enabled_chains: 
+          value: [chain_E]
+          type: vector<string>
+      problem_description:
+          value: $PWD/ModularBot_impedance_config.yaml
+          type: file
+      solver: {value: AlberoImpedance, type: string}
+      enable_feedback: {value: true, type: bool}
+      fc_map: {value: {low: 0.9, high: 0.95}, type: map<double>}
+      use_payload_estimator:
+        value: false  # note: keep false if you care to live
+        type: bool
+      payload_estimator_link:
+        value: ee_E
+        type: string
+
 # additional parameters that don't relate to any plugin
 xbotcore_param:
   /xbot/hal/joint_safety/filter_autostart: {value: true, type: bool}
