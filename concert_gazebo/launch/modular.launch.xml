@@ -1,0 +1,104 @@
+<launch>
+
+    <arg name="gazebo" default="true"/>
+    <arg name="xbot2" default="true"/>
+
+    <!-- Xbot2 configuration -->
+    <arg name="xbot2_config" default="$(find-pkg-share concert_gazebo)/modular.yaml"/>
+
+    <!-- modular configuration -->
+    <arg name="modular_description" default="$(find-pkg-share concert_examples)/concert_example.py"/>
+
+    <!-- modular configuration parameters -->
+    <arg name="realsense" default="false"/>
+    <arg name="velodyne" default="false"/>
+    <arg name="ultrasound" default="false"/>
+    <arg name="use_gpu_ray" default="false"/>
+
+    <!-- gazebo configuration parameters -->
+    <arg name="paused" default="false"/>
+    <arg name="use_sim_time" default="true"/>
+    <arg name="gui" default="true"/>
+    <arg name="headless" default="false"/>
+    <arg name="debug" default="false"/>
+    <arg name="physics" default="ode"/>
+    <arg name="verbose" default="false"/>
+    <arg name="extra_gazebo_args" default=""/>
+
+    <!-- run rviz ? -->
+    <arg name="rviz" default="false"/>
+
+
+    <let name="arg_gui" value="-s" unless="$(var gui)"/> 
+    <let name="arg_gui" value="" if="$(var gui)"/> 
+
+    <let name="arg_verbose" value="" unless="$(var verbose)"/> 
+    <let name="arg_verbose" value="-v" if="$(var verbose)"/> 
+
+    <let name="arg_paused" value="-r" unless="$(var paused)"/> 
+    <let name="arg_paused" value="" if="$(var paused)"/> 
+
+
+    <!-- from where the simulation enviornment will be loaded -->
+    <arg name="world_file" default="$(find-pkg-share concert_gazebo)/world/empty_world.sdf"/>
+
+
+    <!-- Load the URDF/SRDF into the ROS Parameter Server -->
+    <let name="robot_description_gz" 
+         value="$(command 'python3 $(var modular_description) -o urdf 
+                                                    -a gazebo_urdf:=true
+                                                       floating_base:=true 
+                                                       realsense:=$(var realsense)
+                                                       velodyne:=$(var velodyne)
+                                                       ultrasound:=$(var ultrasound)
+                                                       use_gpu_ray:=$(var use_gpu_ray)
+                                                    -r modularbot_gz' ignore)"/>
+
+    <!-- In the XBot urdf realsense and velodyne args should be 'false' otherwise the Gazebo plugin will be included.
+    We keep it like this so to have also in simulation all the frames from cameras and lidars.
+    To be able to remove the gazebo plugins from the XBot urdf we should modify (fork) the repos of realsense and velodyne -->
+    <let name="robot_description_xbot" 
+         value="$(command 'python3 $(var modular_description) -o urdf 
+                                                    -a gazebo_urdf:=false
+                                                       floating_base:=true 
+                                                       realsense:=$(var realsense)
+                                                       velodyne:=$(var velodyne)
+                                                       ultrasound:=false
+                                                       use_gpu_ray:=$(var use_gpu_ray)
+                                                    -r modularbot' ignore)"/>
+        
+
+    <let name="robot_description_semantic" 
+         value="$(command 'python3 $(var modular_description) -o srdf 
+            -a gazebo_urdf:=false
+               realsense:=$(var realsense)
+               velodyne:=$(var velodyne)
+               ultrasound:=false
+               use_gpu_ray:=$(var use_gpu_ray)
+            -r modularbot' ignore)"/> 
+
+
+    <!-- run gazebo -->
+    <group if="$(var gazebo)">
+        <include file="$(find-pkg-share ros_gz_sim)/launch/gz_sim.launch.py">
+            <arg name="gz_args" value="$(var world_file) $(var arg_verbose) $(var arg_gui) $(var arg_paused)"/>
+        </include>
+    
+        <node pkg="ros_gz_sim" exec="create" name="urdf_spawner">
+            <param name="string" type="str" value="$(var robot_description_gz)"/>
+            <param name="z" value="1.0"/>
+        </node>
+    </group>
+
+
+    <!-- run xbot2 -->
+    <executable if="$(var xbot2)" output="screen"
+                cmd="xbot2-core -V --hw sim --simtime --config $(var xbot2_config) --"/>
+
+    
+    <!-- run rviz -->
+    <node if="$(var rviz)" pkg="rviz2" exec="rviz2" name="rviz" output="screen"
+        args="-d $(find-pkg-share concert_gazebo)/rviz/concert_sensors.rviz"/>
+
+
+</launch>
