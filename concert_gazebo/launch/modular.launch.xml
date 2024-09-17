@@ -4,7 +4,7 @@
     <arg name="xbot2" default="true"/>
 
     <!-- Xbot2 configuration -->
-    <arg name="xbot2_config" default="$(find-pkg-share concert_gazebo)/modular.yaml"/>
+    <arg name="xbot2_config" default="$(find-pkg-share concert_xbot2)/modular.yaml"/>
 
     <!-- modular configuration -->
     <arg name="modular_description" default="$(find-pkg-share concert_examples)/concert_example.py"/>
@@ -98,7 +98,9 @@
     
     <!-- run rviz -->
     <node if="$(var rviz)" pkg="rviz2" exec="rviz2" name="rviz" output="screen"
-        args="-d $(find-pkg-share concert_gazebo)/rviz/concert_sensors.rviz"/>
+        args="-d $(find-pkg-share concert_gazebo)/rviz/concert_sensors.rviz">
+        <param name="use_sim_time" value="$(var use_sim_time)"/>
+    </node>
 
 
 </launch>

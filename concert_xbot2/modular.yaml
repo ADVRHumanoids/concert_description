@@ -12,10 +12,8 @@ ModelInterface:
 
 # hal
 xbotcore_device_configs:
-    sim: $(ros2 pkg find --share concert_xbot2)/hal/ModularBot_gz.yaml
-    dummy: $(ros2 pkg find --share concert_xbot2)/hal/ModularBot_dummy.yaml
-    ec_imp: $(ros2 pkg find --share concert_xbot2)/hal/ModularBot_ec_all.yaml
-    ec_idle: $(ros2 pkg find --share concert_xbot2)/hal/ModularBot_ec_all.yaml
+    sim: $(ros2 pkg prefix --share concert_xbot2)/hal/ModularBot_gz.yaml
+    dummy: $(ros2 pkg prefix --share concert_xbot2)/hal/ModularBot_dummy.yaml
 
 # define threads to be created
 xbotcore_threads:

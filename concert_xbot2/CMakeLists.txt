@@ -23,15 +23,10 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 endif()
 
-install(DIRECTORY json
+install(DIRECTORY hal joint_config
   DESTINATION share/${PROJECT_NAME})
 
-install(DIRECTORY models
+install(FILES modular.yaml ModularBot_impedance_config.yaml 
   DESTINATION share/${PROJECT_NAME})
-
-install(DIRECTORY module_addons
-  DESTINATION share/${PROJECT_NAME})
-
-install(FILES families.yaml DESTINATION share/${PROJECT_NAME})
 
 ament_package()
