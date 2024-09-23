@@ -23,9 +23,9 @@ xbotcore_threads:
 # define plugins to be loaded
 xbotcore_plugins:
 
-  ros_io: { thread: nrt_main, type: ros_io }
+  ros_io: { thread: nrt_main, type: ros2_io }
 
-  ros_ctrl: { thread: nrt_main, type: ros_control }
+  ros_ctrl: { thread: nrt_main, type: ros2_control }
 
   omnisteering:
     thread: nrt_main
