@@ -2,6 +2,7 @@
 
     <arg name="gazebo" default="true"/>
     <arg name="xbot2" default="true"/>
+    <arg name="xbot2_gui" default="true"/>
 
     <!-- Xbot2 configuration -->
     <arg name="xbot2_config" default="$(find-pkg-share concert_xbot2)/modular.yaml"/>
@@ -102,6 +103,12 @@
     <executable if="$(var xbot2)" output="screen"
                 cmd="xbot2-core -V --hw sim --simtime --config $(var xbot2_config) --"/>
 
+    <!-- run xbot2_gui_server and client -->
+    <executable if="$(var xbot2_gui)" output="log"
+                cmd="xbot2_gui_server $(find-pkg-share concert_xbot2)/gui_config.yaml"/>
+
+    <executable if="$(var xbot2_gui)" output="log"
+                cmd="xbot2_gui"/>
     
     <!-- run rviz -->
     <node if="$(var rviz)" pkg="rviz2" exec="rviz2" name="rviz" output="screen"

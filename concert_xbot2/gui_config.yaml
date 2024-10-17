@@ -1,0 +1,5 @@
+cartesian:
+  type: cartesian
+  cmd_vel_topics:
+  - /omnisteering/cmd_vel
+

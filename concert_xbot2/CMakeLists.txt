@@ -26,7 +26,7 @@ endif()
 install(DIRECTORY hal joint_config
   DESTINATION share/${PROJECT_NAME})
 
-install(FILES modular.yaml ModularBot_impedance_config.yaml 
+install(FILES modular.yaml ModularBot_impedance_config.yaml gui_config.yaml
   DESTINATION share/${PROJECT_NAME})
 
 ament_package()
