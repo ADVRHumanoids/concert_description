@@ -80,6 +80,7 @@
 
     <!-- run gazebo -->
     <group if="$(var gazebo)">
+        
         <include file="$(find-pkg-share ros_gz_sim)/launch/gz_sim.launch.py">
             <arg name="gz_args" value="$(var world_file) $(var arg_verbose) $(var arg_gui) $(var arg_paused)"/>
         </include>
@@ -88,6 +89,12 @@
             <param name="string" type="str" value="$(var robot_description_gz)"/>
             <param name="z" value="1.0"/>
         </node>
+
+        <node pkg="ros_gz_bridge" exec="parameter_bridge" name="ros_gz_bridge" 
+            args="/VLP16_lidar_back/points@sensor_msgs/msg/PointCloud2[gz.msgs.PointCloudPacked 
+                  /VLP16_lidar_front/points@sensor_msgs/msg/PointCloud2[gz.msgs.PointCloudPacked 
+                  /clock@rosgraph_msgs/msg/Clock[ignition.msgs.Clock"/>
+
     </group>
 
 
