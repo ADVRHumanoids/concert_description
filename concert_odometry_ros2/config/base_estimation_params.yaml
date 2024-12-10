@@ -1,0 +1,19 @@
+base_estimation:
+  ros__parameters:
+    rate: 200.0
+    contact_attach_thr: -100.0
+    contact_release_thr: -150.0
+    velocity_filter:
+      omega: 100.0
+    rolling_contacts:
+      wheel_A: 'wheel_A'
+      wheel_B: 'wheel_B'
+      wheel_C: 'wheel_C'
+      wheel_D: 'wheel_D'
+    z_force_override:
+      wheel_A: 400.0
+      wheel_B: 400.0
+      wheel_C: 400.0
+      wheel_D: 400.0
+    use_imu: false
+    publish_tf: true

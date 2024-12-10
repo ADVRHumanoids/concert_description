@@ -1,0 +1,6 @@
+concert_odometry:
+  ros__parameters:
+    pose_lin_cov: 0.05
+    pose_rot_cov: 0.05
+    vel_lin_cov: 0.01
+    vel_rot_cov: 0.01
