@@ -11,7 +11,7 @@ from ament_index_python.packages import get_package_share_directory
 
 def generate_launch_description():
     # Declare launch arguments
-    launch_arguments = [
+    arg_launch_arguments = [
         DeclareLaunchArgument('gazebo', default_value='true'),
         DeclareLaunchArgument('xbot2', default_value='true'),
         DeclareLaunchArgument('xbot2_gui', default_value='true'),
@@ -30,7 +30,7 @@ def generate_launch_description():
         DeclareLaunchArgument('verbose', default_value='false'),
         DeclareLaunchArgument('extra_gazebo_args', default_value=''),
         DeclareLaunchArgument('rviz', default_value='false'),
-        DeclareLaunchArgument('world_file', default_value=os.path.join(get_package_share_directory('concert_gazebo'), 'world/small_warehouse.sdf'))
+        DeclareLaunchArgument('world_file', default_value=os.path.join(get_package_share_directory('concert_gazebo'), 'world/empty_world.sdf'))
     ]
 
 
@@ -78,6 +78,18 @@ def generate_launch_description():
         ' -r modularbot'
     ],
     on_stderr='ignore'
+    )
+
+    # Robot description publisher node
+    description_publisher_node = Node(
+        package='concert_xbot2',  # Replace with your package name
+        executable='robot_description_publisher',  # Replace with your node executable
+        name='robot_description_publisher',
+        parameters=[
+            {'robot_description': robot_description_xbot},
+            {'robot_description_semantic': robot_description_semantic}
+        ],
+        output='screen'
     )
 
     # Gazebo group
@@ -141,7 +153,8 @@ def generate_launch_description():
     )
 
     # Create and return launch description
-    return LaunchDescription(launch_arguments + [
+    return LaunchDescription(arg_launch_arguments + [
+        description_publisher_node,
         gazebo_group,
         xbot2_process,
         xbot2_gui_server,

@@ -1,9 +1,8 @@
 ## XBotInterface related configs
 
 XBotInterface:
- urdf_path: /tmp/modularbot.urdf
- srdf_path: /tmp/modularbot.srdf
-
+  urdf: "ros2 topic echo /robot_description --once --field data | grep -v '^---$'"
+  srdf: "ros2 topic echo /robot_description_semantic --once --field data | grep -v '^---$'"
 ModelInterface:
   model_type: pin
 
@@ -74,4 +73,3 @@ xbotcore_plugins:
 xbotcore_param:
   /xbot/hal/joint_safety/filter_autostart: {value: true, type: bool}
   /xbot/hal/joint_safety/filter_cutoff_hz: {value: 2.0, type: double}
-

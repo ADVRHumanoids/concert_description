@@ -7,6 +7,24 @@ endif()
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(std_msgs REQUIRED)
+
+# Add the executable
+add_executable(robot_description_publisher src/robot_description_publisher.cpp)
+
+# Link libraries
+ament_target_dependencies(robot_description_publisher
+  rclcpp
+  std_msgs
+)
+
+# Install the node executable
+install(TARGETS robot_description_publisher
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+
 # uncomment the following section in order to fill in
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
@@ -22,7 +40,7 @@ if(BUILD_TESTING)
   set(ament_cmake_cpplint_FOUND TRUE)
   ament_lint_auto_find_test_dependencies()
 endif()
-
+ 
 install(DIRECTORY hal joint_config
   DESTINATION share/${PROJECT_NAME})
 
@@ -30,3 +48,4 @@ install(FILES modular.yaml ModularBot_impedance_config.yaml gui_config.yaml
   DESTINATION share/${PROJECT_NAME})
 
 ament_package()
+
