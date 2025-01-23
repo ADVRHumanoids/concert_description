@@ -8,14 +8,14 @@ import os
 
 def generate_launch_description():
     
-    #package_dir = get_package_share_directory('concert_odometry_ros2')
 
     # Define the configuration paths
-    config_dir = os.path.join(get_package_share_directory('concert_odometry_ros2'), 'config')
+    concert_odom_dir = get_package_share_directory('concert_odometry_ros2')
+    config_dir = os.path.join(concert_odom_dir, 'config')
     base_estimation_config = os.path.join(config_dir, 'base_estimation_params.yaml')
     odometry_stack_config = os.path.join(config_dir, 'concert_odometry_stack.yaml')
     odometry_config = os.path.join(config_dir, 'concert_odometry.yaml')
-    rviz_config = os.path.join(config_dir, 'rviz', 'concert_odometry.rviz')
+    rviz_config = os.path.join(concert_odom_dir, 'rviz', 'concert_odometry.rviz')
 
 
 
