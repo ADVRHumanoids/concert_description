@@ -5,6 +5,7 @@ from launch_ros.actions import Node
 from launch.substitutions import LaunchConfiguration
 from ament_index_python.packages import get_package_share_directory
 import os
+import yaml
 
 def generate_launch_description():
     
@@ -17,6 +18,14 @@ def generate_launch_description():
     odometry_config = os.path.join(config_dir, 'concert_odometry.yaml')
     rviz_config = os.path.join(concert_odom_dir, 'rviz', 'concert_odometry.rviz')
 
+
+    with open(base_estimation_config, 'r') as f:
+        parsed_base_estimation = yaml.safe_load(f)['base_estimation']['ros__parameters']
+        # parsed_base_estimation['base_estimation']['ros__parameters']
+
+    with open(odometry_config, 'r') as f:
+        parsed_odometry = yaml.safe_load(f)['concert_odometry']['ros__parameters']
+        # parsed_odometry['concert_odometry']['ros__parameters']
 
 
     # Launch arguments
@@ -55,9 +64,9 @@ def generate_launch_description():
         output='screen',
         parameters=[
                 {'ik_problem': ik_problem_content},
-                base_estimation_config,  # Loading parameters from YAML file
+                parsed_base_estimation,  # Loading parameters from YAML file
                 {'world_from_tf': 'world' if publish_ground_truth == 'true' else {}},
-                odometry_config,  # Loading parameters from YAML fileV
+                parsed_odometry,  # Loading parameters from YAML fileV
                 {'use_sim_time': use_sim_time}
         ],
         remappings=[
