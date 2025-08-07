@@ -2,6 +2,11 @@ FROM arturolaurenzi/xbot2_focal_base_nvidia:latest
 
 USER root
 SHELL ["/bin/bash", "-ic"]
+
+# Fix expired ROS key
+RUN wget -qO - https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | sudo apt-key add -
+
+# Update package lists
 RUN sudo apt-get update
 
 USER user
@@ -17,6 +22,11 @@ ENV HHCM_FOREST_CLONE_DEFAULT_PROTO=https
 RUN forest init
 RUN echo "source $PWD/setup.bash" >> /home/user/.bashrc
 RUN forest add-recipes git@github.com:advrhumanoids/multidof_recipes.git --tag concert 
+
+# upgrade pip and setuptools
+RUN python3 -m pip install --upgrade pip setuptools wheel
+# Modify PATH to include local bin
+RUN echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
 
 # concert packages
 RUN forest grow pybind11 --verbose --jobs 4 --pwd user
