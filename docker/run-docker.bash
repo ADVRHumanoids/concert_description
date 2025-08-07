@@ -6,5 +6,6 @@ docker run --runtime nvidia --rm -it --gpus all \
  --volume="/tmp/.X11-unix:/tmp/.X11-unix:rw" \
  --volume="$HOME/.ssh:/home/user/.ssh:ro" \
  --name concert_description \
+ --publish=5003:5003 \
  arturolaurenzi/concert_description:latest \
  x-terminal-emulator
