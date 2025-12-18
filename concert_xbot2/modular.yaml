@@ -13,6 +13,7 @@ ModelInterface:
 xbotcore_device_configs:
     sim: $(ros2 pkg prefix --share concert_xbot2)/hal/ModularBot_gz.yaml
     dummy: $(ros2 pkg prefix --share concert_xbot2)/hal/ModularBot_dummy.yaml
+    isaac: $(ros2 pkg prefix --share concert_xbot2)/hal/ModularBot_isaac.yaml
 
 # define threads to be created
 xbotcore_threads:

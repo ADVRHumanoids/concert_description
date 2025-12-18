@@ -1,0 +1,43 @@
+# model implementation
+ModelInterface:
+  model_type: pin
+
+# hal
+xbotcore_device_configs:
+    sim: $(ros2 pkg prefix --share concert_xbot2)/hal/ModularBot_isaac.yaml
+    dummy: $(ros2 pkg prefix --share concert_xbot2)/hal/ModularBot_dummy.yaml
+
+# define threads to be created
+xbotcore_threads:
+  rt_main: { sched: fifo, prio: 60, period: 0.001}
+  nrt_main: { sched: other, prio: 0, period: 0.005 }
+  
+# define plugins to be loaded
+xbotcore_plugins:
+
+  ros_io: { thread: nrt_main, type: ros2_io }
+
+  ros_ctrl: { thread: nrt_main, type: ros2_control }
+
+  omnisteering:
+    thread: nrt_main
+    type: omnisteering_controller_plugin
+    params:
+      wheel_names:
+        value: [wheel_A, wheel_B, wheel_C, wheel_D]
+        type: vector<string>
+      wheel_radius:
+        value: [0.16, 0.16, 0.16, 0.16]
+        type: vector<double>
+
+  homing:
+    thread: rt_main
+    type: homing
+    params:
+      time: { value: 5.0, type: double }
+
+
+# additional parameters that don't relate to any plugin
+xbotcore_param:
+  /xbot/hal/joint_safety/filter_autostart: true
+  /xbot/hal/joint_safety/filter_cutoff_hz: 2.0

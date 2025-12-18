@@ -1,0 +1,44 @@
+x-default-isaac-lab-template-deploy: &default-isaac-lab-template-deploy
+  resources:
+    reservations:
+      devices:
+        - driver: nvidia
+          count: all
+          capabilities: [ gpu ]
+
+services:
+  sim-headless:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        ISAACLAB_BASE_IMAGE: ${ISAACLAB_BASE_IMAGE:-isaac-lab-base}
+    volumes:
+      - /tmp/.xbot2_concert_isaac:/tmp/.xbot2_concert_isaac:rw
+      - type: bind
+        source: ../../..
+        target: /workspace/concert_description
+    network_mode: host
+    restart: always
+    environment: 
+      - OMNI_KIT_ALLOW_ROOT=1
+      - ACCEPT_EULA=Y
+      - ISAACLAB_BASE_IMAGE=isaac-lab-base
+      - DOCKER_ISAACLAB_EXTENSION_TEMPLATE_PATH=/workspace/isaaclab_extension_template
+      - ISAAC_XBOT2_BRIDGE_SOCK_ADDR=/tmp/.xbot2_concert_isaac/xbot2_isaac_server.sock
+    deploy: *default-isaac-lab-template-deploy
+    # This is the entrypoint for the container
+    stdin_open: true
+    tty: true
+    entrypoint: ''
+    command: bash -i #bash -ic 'pip install -e /workspace/kyon_isaac/source/kyon_isaac; bash -i'
+
+  sim:
+    extends:
+      service: sim-headless
+    volumes:
+      - $XAUTHORITY:/root/.Xauthority:rw
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+    environment:
+      - DISPLAY
+      - XAUTHORITY=/root/.Xauthority
