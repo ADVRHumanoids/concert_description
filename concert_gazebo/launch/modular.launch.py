@@ -1,5 +1,5 @@
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, ExecuteProcess, GroupAction
+from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, ExecuteProcess, GroupAction, OpaqueFunction, SetLaunchConfiguration
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration, Command, TextSubstitution
 from launch.conditions import UnlessCondition
@@ -33,15 +33,30 @@ def generate_launch_description():
         DeclareLaunchArgument('world_file', default_value=os.path.join(get_package_share_directory('concert_gazebo'), 'world/empty_world.sdf'))
     ]
 
+    def _build_gz_args(context, *args, **kwargs):
+        world_file = LaunchConfiguration('world_file').perform(context)
+        verbose = LaunchConfiguration('verbose').perform(context).lower() == 'true'
+        gui = LaunchConfiguration('gui').perform(context).lower() == 'true'
+        paused = LaunchConfiguration('paused').perform(context).lower() == 'true'
+        extra_gazebo_args = LaunchConfiguration('extra_gazebo_args').perform(context).strip()
 
-    # Construct `gz_args` with conditional '-r' based on `paused`
-    gz_args = [
-        LaunchConfiguration('world_file'),
-        TextSubstitution(text=' '),
-        TextSubstitution(text='-v ') if LaunchConfiguration('verbose') == 'true' else TextSubstitution(text=''),
-        TextSubstitution(text='-s ') if LaunchConfiguration('gui') == 'false' else TextSubstitution(text=''),
-        TextSubstitution(text='-r') if UnlessCondition(LaunchConfiguration('paused')) else TextSubstitution(text='')
-    ]
+        parts = [world_file]
+        if verbose:
+            parts.append('-v')
+        if not gui:
+            parts.append('-s')
+        if not paused:
+            parts.append('-r')
+        if extra_gazebo_args:
+            parts.append(extra_gazebo_args)
+
+        resolved_gz_args = ' '.join(parts)
+        if verbose:
+            print(f"[modular.launch.py] Resolved gz_args: {resolved_gz_args!r}")
+
+        return [SetLaunchConfiguration('gz_args_resolved', resolved_gz_args)]
+
+    set_gz_args_action = OpaqueFunction(function=_build_gz_args)
 
     # Robot description commands
     robot_description_gz = Command([
@@ -97,7 +112,7 @@ def generate_launch_description():
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(os.path.join(
                 get_package_share_directory('ros_gz_sim'), 'launch', 'gz_sim.launch.py')),
-            launch_arguments={'gz_args': gz_args}.items()
+            launch_arguments={'gz_args': LaunchConfiguration('gz_args_resolved')}.items()
         ),
         Node(
             package='ros_gz_sim',
@@ -155,6 +170,7 @@ def generate_launch_description():
     # Create and return launch description
     return LaunchDescription(arg_launch_arguments + [
         description_publisher_node,
+        set_gz_args_action,
         gazebo_group,
         xbot2_process,
         xbot2_gui_server,
