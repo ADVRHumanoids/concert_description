@@ -10,6 +10,17 @@ from ament_index_python.packages import get_package_share_directory
 
 
 def generate_launch_description():
+    ultrasound_sensor_names = [
+        'ultrasound_fl_sag',
+        'ultrasound_fr_sag',
+        'ultrasound_rl_sag',
+        'ultrasound_rr_sag',
+        'ultrasound_fl_lat',
+        'ultrasound_fr_lat',
+        'ultrasound_rl_lat',
+        'ultrasound_rr_lat'
+    ]
+
     # Declare launch arguments
     arg_launch_arguments = [
         DeclareLaunchArgument('gazebo', default_value='true'),
@@ -20,6 +31,7 @@ def generate_launch_description():
         DeclareLaunchArgument('realsense', default_value='false'),
         DeclareLaunchArgument('velodyne', default_value='false'),
         DeclareLaunchArgument('ultrasound', default_value='false'),
+        DeclareLaunchArgument('imu', default_value='false'),
         DeclareLaunchArgument('use_gpu_ray', default_value='false'),
         DeclareLaunchArgument('paused', default_value='false'),
         DeclareLaunchArgument('use_sim_time', default_value='true'),
@@ -56,6 +68,48 @@ def generate_launch_description():
 
         return [SetLaunchConfiguration('gz_args_resolved', resolved_gz_args)]
 
+    def _create_dynamic_bridge_node(context, *args, **kwargs):
+        bridge_topics = []
+
+        if LaunchConfiguration('imu').perform(context).strip().lower() == 'true':
+            bridge_topics.append('/imu@sensor_msgs/msg/Imu[gz.msgs.IMU')
+
+        if LaunchConfiguration('velodyne').perform(context).strip().lower() == 'true':
+            bridge_topics.extend([
+                '/VLP16_lidar_back/points@sensor_msgs/msg/PointCloud2[gz.msgs.PointCloudPacked',
+                '/VLP16_lidar_front/points@sensor_msgs/msg/PointCloud2[gz.msgs.PointCloudPacked',
+                '/VLP16_lidar_back@sensor_msgs/msg/LaserScan[gz.msgs.LaserScan',
+                '/VLP16_lidar_front@sensor_msgs/msg/LaserScan[gz.msgs.LaserScan'
+            ])
+
+        if LaunchConfiguration('ultrasound').perform(context).strip().lower() == 'true':
+            bridge_topics.extend([
+                f'/bosch_uss5/{sensor_name}/scan@sensor_msgs/msg/LaserScan[gz.msgs.LaserScan'
+                for sensor_name in ultrasound_sensor_names
+            ])
+
+        if LaunchConfiguration('realsense').perform(context).strip().lower() == 'true':
+            bridge_topics.extend([
+                '/D435i_camera_front/depth_image@sensor_msgs/msg/Image[gz.msgs.Image',
+                '/D435i_camera_back/depth_image@sensor_msgs/msg/Image[gz.msgs.Image',
+                '/D435i_camera_front/camera_info@sensor_msgs/msg/CameraInfo[gz.msgs.CameraInfo',
+                '/D435i_camera_back/camera_info@sensor_msgs/msg/CameraInfo[gz.msgs.CameraInfo',
+                '/D435i_camera_front/points@sensor_msgs/msg/PointCloud2[gz.msgs.PointCloudPacked',
+                '/D435i_camera_back/points@sensor_msgs/msg/PointCloud2[gz.msgs.PointCloudPacked',
+            ])
+
+        # Keep simulation time synchronized independently from enabled sensors.
+        bridge_topics.append('/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock')
+
+        return [
+            Node(
+                package='ros_gz_bridge',
+                executable='parameter_bridge',
+                name='ros_gz_bridge',
+                arguments=bridge_topics,
+            )
+        ]
+
     set_gz_args_action = OpaqueFunction(function=_build_gz_args)
 
     # Robot description commands
@@ -65,6 +119,7 @@ def generate_launch_description():
         ' realsense:=', LaunchConfiguration('realsense'),
         ' velodyne:=', LaunchConfiguration('velodyne'),
         ' ultrasound:=', LaunchConfiguration('ultrasound'),
+        ' imu:=', LaunchConfiguration('imu'),
         ' use_gpu_ray:=', LaunchConfiguration('use_gpu_ray'),
         ' -r modularbot_gz'
     ],
@@ -76,7 +131,8 @@ def generate_launch_description():
         ' -o urdf -a gazebo_urdf:=false floating_base:=true',
         ' realsense:=', LaunchConfiguration('realsense'),
         ' velodyne:=', LaunchConfiguration('velodyne'),
-        ' ultrasound:=false',
+        ' ultrasound:=', LaunchConfiguration('ultrasound'),
+        ' imu:=false',
         ' use_gpu_ray:=', LaunchConfiguration('use_gpu_ray'),
         ' -r modularbot'
     ],
@@ -89,6 +145,7 @@ def generate_launch_description():
         ' realsense:=', LaunchConfiguration('realsense'),
         ' velodyne:=', LaunchConfiguration('velodyne'),
         ' ultrasound:=false',
+        ' imu:=false',
         ' use_gpu_ray:=', LaunchConfiguration('use_gpu_ray'),
         ' -r modularbot'
     ],
@@ -120,18 +177,32 @@ def generate_launch_description():
             name='urdf_spawner',
             parameters=[{'string': robot_description_gz, 'z': 1.0}]
         ),
+        OpaqueFunction(function=_create_dynamic_bridge_node),
+        # RealSense RGB bridges (Gazebo -> ROS Image)
         Node(
-            package='ros_gz_bridge',
-            executable='parameter_bridge',
-            name='ros_gz_bridge',
-            arguments=[
-                '/imu@sensor_msgs/msg/Imu[gz.msgs.IMU',
-                '/VLP16_lidar_back/points@sensor_msgs/msg/PointCloud2[gz.msgs.PointCloudPacked',
-                '/VLP16_lidar_front/points@sensor_msgs/msg/PointCloud2[gz.msgs.PointCloudPacked',
-                '/clock@rosgraph_msgs/msg/Clock[ignition.msgs.Clock'
+            condition=IfCondition(LaunchConfiguration('realsense')),
+            package='ros_gz_image',
+            executable='image_bridge',
+            name='d435i_front_color_bridge',
+            arguments=['/D435i_camera_front/image'],
+            remappings=[
+                ('/D435i_camera_front/image', '/D435i_camera_front/color/image_raw')
             ],
-        )
+        ),
+        Node(
+            condition=IfCondition(LaunchConfiguration('realsense')),
+            package='ros_gz_image',
+            executable='image_bridge',
+            name='d435i_back_color_bridge',
+            arguments=['/D435i_camera_back/image'],
+            remappings=[
+                ('/D435i_camera_back/image', '/D435i_camera_back/color/image_raw')
+            ],
+        ),
+        # RealSense depth / camera_info / point cloud bridges are handled
+        # by the single dynamic ros_gz_bridge node above.
     ])
+
 
     # Xbot2 process
     xbot2_process = ExecuteProcess(
