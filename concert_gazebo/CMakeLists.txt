@@ -32,4 +32,8 @@ install(DIRECTORY rviz
 install(DIRECTORY world
   DESTINATION share/${PROJECT_NAME})
 
+install(PROGRAMS
+  scripts/ultrasound_scan_to_range.py
+  DESTINATION lib/${PROJECT_NAME})
+
 ament_package()

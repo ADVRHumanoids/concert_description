@@ -203,6 +203,16 @@ def generate_launch_description():
         # by the single dynamic ros_gz_bridge node above.
     ])
 
+    ultrasound_scan_to_range_node = Node(
+        condition=IfCondition(LaunchConfiguration('ultrasound')),
+        package='concert_gazebo',
+        executable='ultrasound_scan_to_range.py',
+        name='ultrasound_scan_to_range',
+        output='screen',
+        parameters=[{
+            'input_topics': [f'/bosch_uss5/{sensor_name}/scan' for sensor_name in ultrasound_sensor_names]
+        }]
+    )
 
     # Xbot2 process
     xbot2_process = ExecuteProcess(
@@ -243,6 +253,7 @@ def generate_launch_description():
         description_publisher_node,
         set_gz_args_action,
         gazebo_group,
+        ultrasound_scan_to_range_node,
         xbot2_process,
         xbot2_gui_server,
         xbot2_gui_client,
