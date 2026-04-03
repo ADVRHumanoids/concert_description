@@ -5,12 +5,35 @@ from launch.substitutions import LaunchConfiguration, Command, TextSubstitution
 from launch.conditions import UnlessCondition
 from launch_ros.actions import Node
 import os
+import yaml
 from launch.conditions import IfCondition
 from ament_index_python.packages import get_package_share_directory
 
 
+def _load_yaml(raw_content: str):
+    if not raw_content:
+        return {}
+
+    try:
+        data = yaml.safe_load(raw_content) or {}
+    except yaml.YAMLError:
+        return {}
+
+    return data if isinstance(data, dict) else {}
+
+
 def generate_launch_description():
-    ultrasound_sensor_names = [
+    default_camera_names = [
+        'D435i_camera_front',
+        'D435i_camera_back',
+    ]
+
+    default_velodyne_names = [
+        'VLP16_lidar_front',
+        'VLP16_lidar_back',
+    ]
+
+    default_ultrasound_names = [
         'ultrasound_fl_sag',
         'ultrasound_fr_sag',
         'ultrasound_rl_sag',
@@ -20,6 +43,18 @@ def generate_launch_description():
         'ultrasound_rl_lat',
         'ultrasound_rr_lat'
     ]
+
+    def _get_sensors_config(context):
+        return _load_yaml(sensor_config_gz.perform(context))
+
+    def _resolve_sensor_names(sensors_config, sensor_type, default_names):
+        names = list(default_names)
+        sensor_names = sensors_config.get('sensor_names', {})
+        if isinstance(sensor_names, dict):
+            file_names = sensor_names.get(sensor_type, [])
+            if isinstance(file_names, list) and file_names:
+                names = [str(name).strip() for name in file_names if str(name).strip()]
+        return names
 
     # Declare launch arguments
     arg_launch_arguments = [
@@ -70,43 +105,90 @@ def generate_launch_description():
 
     def _create_dynamic_bridge_node(context, *args, **kwargs):
         bridge_topics = []
+        dynamic_nodes = []
 
-        if LaunchConfiguration('imu').perform(context).strip().lower() == 'true':
+        # Sensor enable/disable is controlled only by launch args.
+        # Sensor names are obtained from the generator dedicated sensors output.
+        sensors_config = _get_sensors_config(context)
+
+        imu_enabled = LaunchConfiguration('imu').perform(context).strip().lower() == 'true'
+        velodyne_enabled = LaunchConfiguration('velodyne').perform(context).strip().lower() == 'true'
+        ultrasound_enabled = LaunchConfiguration('ultrasound').perform(context).strip().lower() == 'true'
+        realsense_enabled = LaunchConfiguration('realsense').perform(context).strip().lower() == 'true'
+
+        if imu_enabled:
             bridge_topics.append('/imu@sensor_msgs/msg/Imu[gz.msgs.IMU')
 
-        if LaunchConfiguration('velodyne').perform(context).strip().lower() == 'true':
-            bridge_topics.extend([
-                '/VLP16_lidar_back/points@sensor_msgs/msg/PointCloud2[gz.msgs.PointCloudPacked',
-                '/VLP16_lidar_front/points@sensor_msgs/msg/PointCloud2[gz.msgs.PointCloudPacked',
-                '/VLP16_lidar_back@sensor_msgs/msg/LaserScan[gz.msgs.LaserScan',
-                '/VLP16_lidar_front@sensor_msgs/msg/LaserScan[gz.msgs.LaserScan'
-            ])
+        if velodyne_enabled:
+            velodyne_names = _resolve_sensor_names(sensors_config, 'velodyne', default_velodyne_names)
+            for velodyne_name in velodyne_names:
+                bridge_topics.extend([
+                    f'/{velodyne_name}/points@sensor_msgs/msg/PointCloud2[gz.msgs.PointCloudPacked',
+                    f'/{velodyne_name}@sensor_msgs/msg/LaserScan[gz.msgs.LaserScan',
+                ])
 
-        if LaunchConfiguration('ultrasound').perform(context).strip().lower() == 'true':
+        if ultrasound_enabled:
+            ultrasound_names = _resolve_sensor_names(sensors_config, 'ultrasound', default_ultrasound_names)
+            
             bridge_topics.extend([
                 f'/bosch_uss5/{sensor_name}/scan@sensor_msgs/msg/LaserScan[gz.msgs.LaserScan'
-                for sensor_name in ultrasound_sensor_names
+                for sensor_name in ultrasound_names
             ])
 
-        if LaunchConfiguration('realsense').perform(context).strip().lower() == 'true':
-            bridge_topics.extend([
-                '/D435i_camera_front/depth_image@sensor_msgs/msg/Image[gz.msgs.Image',
-                '/D435i_camera_back/depth_image@sensor_msgs/msg/Image[gz.msgs.Image',
-                '/D435i_camera_front/camera_info@sensor_msgs/msg/CameraInfo[gz.msgs.CameraInfo',
-                '/D435i_camera_back/camera_info@sensor_msgs/msg/CameraInfo[gz.msgs.CameraInfo',
-                '/D435i_camera_front/points@sensor_msgs/msg/PointCloud2[gz.msgs.PointCloudPacked',
-                '/D435i_camera_back/points@sensor_msgs/msg/PointCloud2[gz.msgs.PointCloudPacked',
-            ])
+        if realsense_enabled:
+            camera_names = _resolve_sensor_names(sensors_config, 'camera', default_camera_names)
+
+            for camera_name in camera_names:
+                bridge_topics.extend([
+                    f'/{camera_name}/depth_image@sensor_msgs/msg/Image[gz.msgs.Image',
+                    f'/{camera_name}/camera_info@sensor_msgs/msg/CameraInfo[gz.msgs.CameraInfo',
+                    f'/{camera_name}/points@sensor_msgs/msg/PointCloud2[gz.msgs.PointCloudPacked',
+                ])
+
+                # RGB image uses ros_gz_image bridge and can be remapped per camera name.
+                dynamic_nodes.append(
+                    Node(
+                        package='ros_gz_image',
+                        executable='image_bridge',
+                        name=f'{camera_name}_color_bridge',
+                        arguments=[f'/{camera_name}/image'],
+                        remappings=[
+                            (f'/{camera_name}/image', f'/{camera_name}/color/image_raw')
+                        ],
+                    )
+                )
 
         # Keep simulation time synchronized independently from enabled sensors.
         bridge_topics.append('/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock')
 
-        return [
+        dynamic_nodes.append(
             Node(
                 package='ros_gz_bridge',
                 executable='parameter_bridge',
                 name='ros_gz_bridge',
                 arguments=bridge_topics,
+            )
+        )
+
+        return dynamic_nodes
+
+    def _create_ultrasound_scan_to_range_node(context, *args, **kwargs):
+        ultrasound_enabled = LaunchConfiguration('ultrasound').perform(context).strip().lower() == 'true'
+        if not ultrasound_enabled:
+            return []
+
+        sensors_config = _get_sensors_config(context)
+        ultrasound_names = _resolve_sensor_names(sensors_config, 'ultrasound', default_ultrasound_names)
+
+        return [
+            Node(
+                package='concert_gazebo',
+                executable='ultrasound_scan_to_range.py',
+                name='ultrasound_scan_to_range',
+                output='screen',
+                parameters=[{
+                    'input_topics': [f'/bosch_uss5/{sensor_name}/scan' for sensor_name in ultrasound_names]
+                }]
             )
         ]
 
@@ -125,6 +207,23 @@ def generate_launch_description():
     ],
     on_stderr='ignore'
     )
+
+    sensor_config_gz = Command([
+        'python3', ' ', LaunchConfiguration('modular_description'),
+        ' -o sensors -a gazebo_urdf:=true floating_base:=true',
+        ' realsense:=', LaunchConfiguration('realsense'),
+        ' velodyne:=', LaunchConfiguration('velodyne'),
+        ' ultrasound:=', LaunchConfiguration('ultrasound'),
+        ' imu:=', LaunchConfiguration('imu'),
+        ' use_gpu_ray:=', LaunchConfiguration('use_gpu_ray'),
+        ' -r modularbot_gz'
+    ],
+    on_stderr='ignore'
+    )
+
+    # NOTE:In the XBot urdf realsense and velodyne args should be 'false' otherwise the Gazebo plugin will be included.
+    # We keep it like this so to have also in simulation all the frames from cameras and lidars.
+    # To be able to remove the gazebo plugins from the XBot urdf we should modify (fork) the repos of realsense and velodyne
 
     robot_description_xbot = Command([
         'python3', ' ', LaunchConfiguration('modular_description'),
@@ -178,41 +277,9 @@ def generate_launch_description():
             parameters=[{'string': robot_description_gz, 'z': 1.0}]
         ),
         OpaqueFunction(function=_create_dynamic_bridge_node),
-        # RealSense RGB bridges (Gazebo -> ROS Image)
-        Node(
-            condition=IfCondition(LaunchConfiguration('realsense')),
-            package='ros_gz_image',
-            executable='image_bridge',
-            name='d435i_front_color_bridge',
-            arguments=['/D435i_camera_front/image'],
-            remappings=[
-                ('/D435i_camera_front/image', '/D435i_camera_front/color/image_raw')
-            ],
-        ),
-        Node(
-            condition=IfCondition(LaunchConfiguration('realsense')),
-            package='ros_gz_image',
-            executable='image_bridge',
-            name='d435i_back_color_bridge',
-            arguments=['/D435i_camera_back/image'],
-            remappings=[
-                ('/D435i_camera_back/image', '/D435i_camera_back/color/image_raw')
-            ],
-        ),
-        # RealSense depth / camera_info / point cloud bridges are handled
-        # by the single dynamic ros_gz_bridge node above.
+        # Camera depth / camera_info / point cloud bridges and RGB image bridges
+        # are generated dynamically in _create_dynamic_bridge_node().
     ])
-
-    ultrasound_scan_to_range_node = Node(
-        condition=IfCondition(LaunchConfiguration('ultrasound')),
-        package='concert_gazebo',
-        executable='ultrasound_scan_to_range.py',
-        name='ultrasound_scan_to_range',
-        output='screen',
-        parameters=[{
-            'input_topics': [f'/bosch_uss5/{sensor_name}/scan' for sensor_name in ultrasound_sensor_names]
-        }]
-    )
 
     # Xbot2 process
     xbot2_process = ExecuteProcess(
@@ -253,7 +320,7 @@ def generate_launch_description():
         description_publisher_node,
         set_gz_args_action,
         gazebo_group,
-        ultrasound_scan_to_range_node,
+        OpaqueFunction(function=_create_ultrasound_scan_to_range_node),
         xbot2_process,
         xbot2_gui_server,
         xbot2_gui_client,
