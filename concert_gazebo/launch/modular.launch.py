@@ -4,6 +4,7 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration, Command, TextSubstitution
 from launch.conditions import UnlessCondition
 from launch_ros.actions import Node
+from launch_ros.parameter_descriptions import ParameterValue
 import os
 import yaml
 from launch.conditions import IfCondition
@@ -257,8 +258,8 @@ def generate_launch_description():
         executable='robot_description_publisher',  # Replace with your node executable
         name='robot_description_publisher',
         parameters=[
-            {'robot_description': robot_description_xbot},
-            {'robot_description_semantic': robot_description_semantic}
+            {'robot_description': ParameterValue(robot_description_xbot, value_type=str)},
+            {'robot_description_semantic': ParameterValue(robot_description_semantic, value_type=str)}
         ],
         output='screen'
     )
@@ -274,7 +275,7 @@ def generate_launch_description():
             package='ros_gz_sim',
             executable='create',
             name='urdf_spawner',
-            parameters=[{'string': robot_description_gz, 'z': 1.0}]
+            parameters=[{'string': ParameterValue(robot_description_gz, value_type=str)}, {'z': ParameterValue(1.0, value_type=float)}]
         ),
         OpaqueFunction(function=_create_dynamic_bridge_node),
         # Camera depth / camera_info / point cloud bridges and RGB image bridges
