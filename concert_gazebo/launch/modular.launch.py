@@ -198,7 +198,7 @@ def generate_launch_description():
     # Robot description commands
     robot_description_gz = Command([
         'python3', ' ', LaunchConfiguration('modular_description'),
-        ' -o urdf -a gazebo_urdf:=true floating_base:=true',
+        ' -o urdf --quiet -a gazebo_urdf:=true',
         ' realsense:=', LaunchConfiguration('realsense'),
         ' velodyne:=', LaunchConfiguration('velodyne'),
         ' ultrasound:=', LaunchConfiguration('ultrasound'),
@@ -211,7 +211,7 @@ def generate_launch_description():
 
     sensor_config_gz = Command([
         'python3', ' ', LaunchConfiguration('modular_description'),
-        ' -o sensors -a gazebo_urdf:=true floating_base:=true',
+        ' -o sensors --quiet -a gazebo_urdf:=true',
         ' realsense:=', LaunchConfiguration('realsense'),
         ' velodyne:=', LaunchConfiguration('velodyne'),
         ' ultrasound:=', LaunchConfiguration('ultrasound'),
@@ -228,7 +228,7 @@ def generate_launch_description():
 
     robot_description_xbot = Command([
         'python3', ' ', LaunchConfiguration('modular_description'),
-        ' -o urdf -a gazebo_urdf:=false floating_base:=true',
+        ' -o urdf --quiet -a gazebo_urdf:=false',
         ' realsense:=', LaunchConfiguration('realsense'),
         ' velodyne:=', LaunchConfiguration('velodyne'),
         ' ultrasound:=', LaunchConfiguration('ultrasound'),
@@ -241,7 +241,7 @@ def generate_launch_description():
 
     robot_description_semantic = Command([
         'python3', ' ', LaunchConfiguration('modular_description'),
-        ' -o srdf -a gazebo_urdf:=false',
+        ' -o srdf --quiet -a gazebo_urdf:=false',
         ' realsense:=', LaunchConfiguration('realsense'),
         ' velodyne:=', LaunchConfiguration('velodyne'),
         ' ultrasound:=false',
