@@ -165,6 +165,10 @@ def generate_launch_description():
             aligned_depth_rs_names = _resolve_sensor_names(sensors_config, 'camera/realsense_depth_aligned', [])
             rs_names = _resolve_sensor_names(sensors_config, 'camera/realsense', [])
             camera_names = _resolve_sensor_names(sensors_config, 'camera/generic', default_camera_names)
+
+            # Keep lists disjoint: aligned cameras must not be processed also as non-aligned.
+            aligned_depth_rs_set = set(aligned_depth_rs_names)
+            rs_names = [name for name in rs_names if name not in aligned_depth_rs_set]
             
             # Realsense cameras with non-aligned depth
             for camera_name in rs_names:
@@ -174,9 +178,10 @@ def generate_launch_description():
                     f'/{camera_name}/depth/camera_info@sensor_msgs/msg/CameraInfo[gz.msgs.CameraInfo',
                     f'/{camera_name}/depth/image_raw/points@sensor_msgs/msg/PointCloud2[gz.msgs.PointCloudPacked',
                 ])
-                bridge_remappings.append(
-                    (f'/{camera_name}/depth/image_raw/points', f'/{camera_name}/depth/points')
-                )
+                bridge_remappings.extend([
+                    (f'/{camera_name}/depth/image_raw/points', f'/{camera_name}/depth/color/points'),
+                    (f'/{camera_name}/depth/image_raw', f'/{camera_name}/depth/image_rect_raw')
+                ])
 
                 # RGB image uses ros_gz_image bridge and can be remapped per camera name.
                 dynamic_nodes.append(
@@ -192,13 +197,15 @@ def generate_launch_description():
             for camera_name in aligned_depth_rs_names:
                 bridge_topics.extend([
                     f'/{camera_name}/color/camera_info@sensor_msgs/msg/CameraInfo[gz.msgs.CameraInfo',
+                    f'/{camera_name}/aligned_depth_to_color/camera_info@sensor_msgs/msg/CameraInfo[gz.msgs.CameraInfo',
                     f'/{camera_name}/aligned_depth_to_color/image_raw@sensor_msgs/msg/Image[gz.msgs.Image',
-                    f'/{camera_name}/aligned_depth_to_color/image_raw/points@sensor_msgs/msg/PointCloud2[gz.msgs.PointCloudPacked',
+                    f'/{camera_name}/aligned_depth_to_color/image_raw/points@sensor_msgs/msg/PointCloud2[gz.msgs.PointCloudPacked'
                 ])
                 bridge_remappings.append(
+                    # Remapping to have the same name as the real hardware topics
                     (
                         f'/{camera_name}/aligned_depth_to_color/image_raw/points',
-                        f'/{camera_name}/aligned_depth_to_color/points',
+                        f'/{camera_name}/depth/color/points',
                     )
                 )
 
@@ -218,15 +225,19 @@ def generate_launch_description():
                     f'/{camera_name}/camera_info@sensor_msgs/msg/CameraInfo[gz.msgs.CameraInfo',
                     f'/{camera_name}/points@sensor_msgs/msg/PointCloud2[gz.msgs.PointCloudPacked',
                 ])
+                bridge_remappings.extend([
+                    (f'/{camera_name}/points', f'/{camera_name}/depth/color/points'),
+                    (f'/{camera_name}/depth_image', f'/{camera_name}/depth/image_rect_raw'),
+                    (f'/{camera_name}/camera_info', f'/{camera_name}/color/camera_info'),
+                    (f'/{camera_name}/image', f'/{camera_name}/color/image_raw')
+                    # /{camera_name}/depth/camera_info is not available in this mode as we use a single Gazebo rgbd sensor and the camera info would be the same for both depth and color, while in real hardware these two differ (bigger fov for depth).
+                ])
                 dynamic_nodes.append(
                     Node(
                         package='ros_gz_image',
                         executable='image_bridge',
                         name=f'{camera_name}_color_bridge',
-                        arguments=[f'/{camera_name}/image'],
-                        remappings=[
-                            (f'/{camera_name}/image', f'/{camera_name}/color/image_raw')
-                        ],
+                        arguments=[f'/{camera_name}/color/image_raw'],
                     )
                 )
 
