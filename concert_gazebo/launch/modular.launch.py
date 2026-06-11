@@ -395,7 +395,7 @@ def generate_launch_description():
         executable='rviz2',
         name='rviz',
         output='screen',
-        arguments=['-d', os.path.join(get_package_share_directory('concert_gazebo'), 'rviz/concert_sensors.rviz')],
+        arguments=['-d', os.path.join(get_package_share_directory('concert_gazebo'), 'rviz/concert_sensors_ros2.rviz')],
         parameters=[{'use_sim_time': LaunchConfiguration('use_sim_time')}]
     )
 

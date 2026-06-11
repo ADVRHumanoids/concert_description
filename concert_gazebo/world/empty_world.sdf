@@ -57,6 +57,11 @@
       name="gz::sim::systems::GzClockPlugin">
     </plugin>
 
+    <plugin
+      filename="Ros2CameraSystem"
+      name="custom::Ros2CameraSystem">
+    </plugin>
+
     
 
     <light type="directional" name="sun">
