@@ -283,7 +283,10 @@ def generate_launch_description():
                         package='ros_gz_image',
                         executable='image_bridge',
                         name=f'{camera_name}_color_bridge',
-                        arguments=[f'/{camera_name}/color/image_raw'],
+                        arguments=[f'/{camera_name}/image'],
+                        remappings=[
+                            (f'/{camera_name}/image', f'/{camera_name}/color/image_raw'),
+                        ],
                     )
                 )
 
