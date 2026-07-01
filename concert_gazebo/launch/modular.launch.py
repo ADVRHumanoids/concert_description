@@ -174,7 +174,14 @@ def generate_launch_description():
         #################
 
         if imu_enabled:
-            bridge_topics.append('/imu@sensor_msgs/msg/Imu[gz.msgs.IMU')
+            imu_names = _resolve_sensor_names(sensors_config, 'imu/vectornav', [])
+            if not imu_names:
+                imu_names = _resolve_sensor_names(sensors_config, 'imu/generic', ['imu_link'])
+            for imu_name in imu_names:
+                bridge_topics.append(f'/{imu_name}@sensor_msgs/msg/Imu[gz.msgs.IMU')
+                bridge_remappings.extend([
+                    (f'/{imu_name}', f'/xbotcore/imu/{imu_name}')
+                ])
 
         if velodyne_enabled:
             velodyne_names = _resolve_sensor_names(sensors_config, 'lidar/velodyne', default_velodyne_names)
@@ -311,7 +318,9 @@ def generate_launch_description():
             return []
 
         sensors_config = _get_sensors_config(context)
-        ultrasound_names = _resolve_sensor_names(sensors_config, 'ultrasound', default_ultrasound_names)
+        ultrasound_names = _resolve_sensor_names(sensors_config, 'ultrasound/bosch_uss5', [])
+        if not ultrasound_names:
+            ultrasound_names = _resolve_sensor_names(sensors_config, 'ultrasound/generic', default_ultrasound_names)
 
         return [
             Node(
