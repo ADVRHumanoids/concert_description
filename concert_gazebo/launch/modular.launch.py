@@ -184,12 +184,18 @@ def generate_launch_description():
                 ])
 
         if velodyne_enabled:
-            velodyne_names = _resolve_sensor_names(sensors_config, 'lidar/velodyne', default_velodyne_names)
+            velodyne_names = _resolve_sensor_names(sensors_config, 'lidar/velodyne', [])
+            if not velodyne_names:
+                velodyne_names = _resolve_sensor_names(sensors_config, 'lidar/generic', default_velodyne_names)
             for velodyne_name in velodyne_names:
                 bridge_topics.extend([
                     f'/{velodyne_name}/points@sensor_msgs/msg/PointCloud2[gz.msgs.PointCloudPacked',
                     f'/{velodyne_name}@sensor_msgs/msg/LaserScan[gz.msgs.LaserScan',
                 ])
+                bridge_remappings.extend([
+                    (f'/{velodyne_name}/points', f'/{velodyne_name}/velodyne_points'),
+                    (f'/{velodyne_name}', f'/{velodyne_name}/scan'),
+                ])  
 
         if ultrasound_enabled:
             ultrasound_names = _resolve_sensor_names(sensors_config, 'ultrasound/bosch_uss5', default_ultrasound_names)
