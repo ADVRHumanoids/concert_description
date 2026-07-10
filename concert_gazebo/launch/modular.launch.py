@@ -288,7 +288,6 @@ def generate_launch_description():
                     (f'/{camera_name}/points', f'/{camera_name}/depth/color/points'),
                     (f'/{camera_name}/depth_image', f'/{camera_name}/depth/image_rect_raw'),
                     (f'/{camera_name}/camera_info', f'/{camera_name}/color/camera_info'),
-                    (f'/{camera_name}/image', f'/{camera_name}/color/image_raw')
                     # /{camera_name}/depth/camera_info is not available in this mode as we use a single Gazebo rgbd sensor and the camera info would be the same for both depth and color, while in real hardware these two differ (bigger fov for depth).
                 ])
                 dynamic_nodes.append(
