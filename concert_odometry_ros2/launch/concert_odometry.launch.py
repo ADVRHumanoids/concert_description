@@ -75,7 +75,8 @@ def generate_launch_description():
         ],
         remappings=[
             ('/robot_description', '/xbotcore/robot_description'),
-            ('/robot_description_semantic', '/xbotcore/robot_description_semantic')
+            ('/robot_description_semantic', '/xbotcore/robot_description_semantic'),
+            ('/imu/imu_link', '/xbotcore/imu/imu_link'),
         ]
     )
 

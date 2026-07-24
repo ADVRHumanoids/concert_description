@@ -15,5 +15,5 @@ base_estimation:
       wheel_B: 400.0
       wheel_C: 400.0
       wheel_D: 400.0
-    use_imu: false
+    use_imu: true
     publish_tf: true
