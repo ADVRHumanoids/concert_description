@@ -1,0 +1,39 @@
+name: Docker
+
+on:
+  push:
+    branches: [master, ros2]
+    tags: ['v[0-9]+.[0-9]+.[0-9]+*']
+
+env:
+  IMAGE: edoardoromiti/concert_description
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Build docker image
+        run: ./docker/build-docker.bash --pull --no-cache
+
+      - name: Login to Docker Hub
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+      - name: Compute image tag
+        id: tag
+        run: |
+          if [ "${{ github.ref_type }}" = "tag" ]; then
+            echo "tag=${{ github.ref_name }}" >> "$GITHUB_OUTPUT"
+          elif [ "${{ github.ref_name }}" = "master" ]; then
+            echo "tag=ros1-legacy" >> "$GITHUB_OUTPUT"
+          else
+            echo "tag=latest" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Push image
+        run: |
+          docker tag $IMAGE:latest $IMAGE:${{ steps.tag.outputs.tag }}
+          docker push $IMAGE:${{ steps.tag.outputs.tag }}
