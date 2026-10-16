@@ -7,9 +7,7 @@ SHELL ["/bin/bash", "-ic"]
 RUN wget -qO - https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | sudo apt-key add -
 
 # Update package lists
-RUN sudo find /etc/apt -type f \( -name '*.list' -o -name '*.sources' \) \
-    -exec sed -i 's|http://xbot.cloud/dev/xbot2|https://xbot.cloud/dev/xbot2/current|g' {} + \
-    && sudo apt-get update
+RUN sudo apt-get update
 
 USER user
 SHELL ["/bin/bash", "-ic"]
