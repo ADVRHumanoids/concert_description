@@ -8,7 +8,7 @@ of this readme.
 
 To **update the image** to the latest version
 ```bash
-docker pull arturolaurenzi/concert_description
+docker pull edoardoromiti/concert_description-ros1-legacy
 ```
 
 To **locally build the image** 

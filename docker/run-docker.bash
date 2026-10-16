@@ -7,5 +7,5 @@ docker run --runtime nvidia --rm -it --gpus all \
  --volume="$HOME/.ssh:/home/user/.ssh:ro" \
  --name concert_description \
  --publish=5003:5003 \
- arturolaurenzi/concert_description:latest \
+ edoardoromiti/concert_description-ros1-legacy:latest \
  x-terminal-emulator

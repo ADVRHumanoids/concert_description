@@ -22,13 +22,12 @@ jobs:
       - name: Push unstable tag (branch builds)
         if: ${{ !startsWith(github.ref, 'refs/tags/') }}
         run: |
-          docker tag arturolaurenzi/concert_description:latest edoardoromiti/concert_description-ros1-legacy:unstable
+          docker tag edoardoromiti/concert_description-ros1-legacy:latest edoardoromiti/concert_description-ros1-legacy:unstable
           docker push edoardoromiti/concert_description-ros1-legacy:unstable
 
       - name: Push latest and version tag (tag builds)
         if: startsWith(github.ref, 'refs/tags/')
         run: |
-          docker tag arturolaurenzi/concert_description:latest edoardoromiti/concert_description-ros1-legacy:latest
           docker push edoardoromiti/concert_description-ros1-legacy:latest
-          docker tag arturolaurenzi/concert_description:latest edoardoromiti/concert_description-ros1-legacy:${{ github.ref_name }}
+          docker tag edoardoromiti/concert_description-ros1-legacy:latest edoardoromiti/concert_description-ros1-legacy:${{ github.ref_name }}
           docker push edoardoromiti/concert_description-ros1-legacy:${{ github.ref_name }}
