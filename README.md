@@ -2,19 +2,21 @@
 ROS package containing modular's simulation scripts and launch files
 
 ## Docker image
-A ready-to-use Docker container is provided, and it can be executed with `.docker/run-docker.bash`. Upon
+A ready-to-use Docker container is provided, and it can be executed with `./docker/run-docker.bash`. Upon
 first execution, a lot of data might be downloaded. The container can be used to follow the rest 
 of this readme.
 
 To **update the image** to the latest version
 ```bash
-docker pull edoardoromiti/concert_description
+docker pull ghcr.io/advrhumanoids/concert_description:latest
 ```
 
 To **locally build the image** 
 ```bash
-.docker/build-docker.bash [--no-cache] 
+./docker/build-docker.bash [--no-cache]
 ```
+
+See [Docker instructions](docker/README.md) for GHCR access and publishing details.
 
 ## Dependencies
 

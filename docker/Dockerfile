@@ -1,5 +1,7 @@
 FROM arturolaurenzi/xbot2_focal_base_nvidia:latest
 
+LABEL org.opencontainers.image.source="https://github.com/ADVRHumanoids/concert_description"
+
 USER root
 SHELL ["/bin/bash", "-ic"]
 

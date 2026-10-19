@@ -1,7 +1,7 @@
 #!/bin/bash
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+IMAGE="${IMAGE:-ghcr.io/advrhumanoids/concert_description}"
 
-cd $DIR
-
-docker build --tag edoardoromiti/concert_description:latest . -f $DIR/Dockerfile "$@"
+docker build --tag "$IMAGE:latest" \
+    -f "$DIR/Dockerfile" "$@" "$DIR/.."
