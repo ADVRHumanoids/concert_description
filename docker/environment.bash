@@ -1,6 +1,11 @@
 # Shared by noninteractive build shells, the entrypoint, and interactive shells.
 # ROS and Forest setup scripts may reference unset variables: do not use nounset.
 source /opt/ros/"${ROS_DISTRO}"/setup.bash
+# Binary XBot2 packages use their own prefix, outside the ROS installation.
+# Load it before the workspace so workspace packages can override the binaries.
+if [[ -f /opt/xbot/setup.sh ]]; then
+    source /opt/xbot/setup.sh
+fi
 source /home/user/env/bin/activate
 if [[ -f "${CONCERT_WS}/setup.bash" ]]; then
     source "${CONCERT_WS}/setup.bash"

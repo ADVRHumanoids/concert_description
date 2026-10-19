@@ -35,6 +35,9 @@ source references as well when making a reproducible release. Local changes
 in sibling repositories such as Modular are not included by this build.
 
 Dependencies are maintained in the Forest recipes, not in the Dockerfile.
+The Dockerfile explicitly sources `/opt/xbot/setup.sh` before `forest grow`
+so Forest can discover the base image's installed XBot2 dependencies. It also
+checks that `xbot2-core` is available before starting the build.
 `forest grow concert_all` builds the dependency tree and this checkout together;
 changing CONCERT source invalidates that Docker build layer. Add or remove
 CONCERT dependencies in `multidof_recipes/recipes/concert_description.yaml`.
@@ -49,8 +52,9 @@ these packages, including the initialized `concert_resources` submodule, are
 included. The legacy ROS 1 packages and the separate Isaac environment are
 excluded.
 
-The entrypoint sources ROS, the Python environment, and the Forest workspace,
-including for commands passed directly to `docker run`. For example:
+The entrypoint sources ROS, `/opt/xbot/setup.sh` when present, the Python
+environment, and the Forest workspace. This also applies to commands passed
+directly to `docker run`. For example:
 
 ```bash
 docker run --rm edoardoromiti/concert_description:latest \
@@ -62,6 +66,11 @@ Inside an interactive container with GPU/display access, launch with:
 ```bash
 ros2 launch concert_gazebo modular.launch.py
 ```
+
+The `ros_gz_sim` launcher reads the resource path exported by
+`concert_resources/package.xml` to resolve `model://concert_resources/...`
+meshes. It also includes `LD_LIBRARY_PATH` in Gazebo's system plugin search
+path, using the libraries exposed by the XBot2 and Forest setup scripts.
 
 The existing `run-docker.bash` supplies NVIDIA/X11 access and starts a terminal.
 It also sets `__NV_PRIME_RENDER_OFFLOAD=1` and
