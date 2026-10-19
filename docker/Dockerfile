@@ -6,8 +6,12 @@ SHELL ["/bin/bash", "-ic"]
 # Fix expired ROS key
 RUN wget -qO - https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | sudo apt-key add -
 
-# Update package lists
-RUN sudo apt-get update
+# add xbot2 source and keys
+# base image's xbot.list points to the dead xbot.cloud, so replace it before the first apt-get update
+RUN wget -qO - https://advrhumanoids.github.io/XBotBuild/KEY.gpg | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/xbot2.gpg && \
+    sudo sh -c 'echo "deb https://advrhumanoids.github.io/XBotBuild/ubuntu/focal ./" > /etc/apt/sources.list.d/xbot.list' && \
+    sudo apt-get update && \
+    sudo apt-get install -y wget gnupg curl gnupg2 ca-certificates lsb-release
 
 USER user
 SHELL ["/bin/bash", "-ic"]
