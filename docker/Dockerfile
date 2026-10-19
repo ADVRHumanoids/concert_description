@@ -1,52 +1,57 @@
-FROM arturolaurenzi/xbot2_focal_base_nvidia:latest
+# Override with an image built from ADVRHumanoids/xbot2_docker/noble/Dockerfile.
+# Pin a tested tag or digest for release builds.
+ARG BASE_IMAGE=hhcmhub/xbot2-noble-dev:latest
+FROM ${BASE_IMAGE}
 
 USER root
-SHELL ["/bin/bash", "-ic"]
+SHELL ["/bin/bash", "-eo", "pipefail", "-c"]
 
-# Fix expired ROS key
-RUN wget -qO - https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | sudo apt-key add -
+ENV CONCERT_WS=/home/user/concert_ws \
+    HHCM_FOREST_CLONE_DEFAULT_PROTO=https \
+    RMW_IMPLEMENTATION=rmw_cyclonedds_cpp \
+    BASH_ENV=/home/user/concert-docker-env.bash
 
-# add xbot2 source and keys
-# base image's xbot.list points to the dead xbot.cloud, so replace it before the first apt-get update
-RUN wget -qO - https://advrhumanoids.github.io/XBotBuild/KEY.gpg | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/xbot2.gpg && \
-    sudo sh -c 'echo "deb https://advrhumanoids.github.io/XBotBuild/ubuntu/focal ./" > /etc/apt/sources.list.d/xbot.list' && \
-    sudo apt-get update && \
-    sudo apt-get install -y wget gnupg curl gnupg2 ca-certificates lsb-release
+COPY docker/environment.bash /home/user/concert-docker-env.bash
+COPY docker/entrypoint.bash /usr/local/bin/concert-entrypoint
+RUN chmod 755 /usr/local/bin/concert-entrypoint && \
+    mkdir -p "$CONCERT_WS" && chown user:user "$CONCERT_WS"
 
 USER user
-SHELL ["/bin/bash", "-ic"]
-
-WORKDIR /home/user
-
-# create forest ws and use it to clone and install CONCERT's simulation package
-RUN mkdir concert_ws
 WORKDIR /home/user/concert_ws
-ENV HHCM_FOREST_CLONE_DEFAULT_PROTO=https
 
-RUN forest init
-RUN echo "source $PWD/setup.bash" >> /home/user/.bashrc
-RUN forest add-recipes git@github.com:advrhumanoids/multidof_recipes.git --tag concert 
+# Reuse the base image's system-site-packages venv, rather than installing
+# Python packages into Ubuntu's externally managed system interpreter.
+# The base owns the toolchain; check the build requirements without running apt.
+RUN test "$ROS_DISTRO" = jazzy && \
+    test -f /home/user/env/bin/activate && \
+    command -v c++ make cmake git && \
+    python -c 'import sysconfig; from pathlib import Path; assert (Path(sysconfig.get_path("include")) / "Python.h").is_file(), "Base image is missing Python development headers"' && \
+    python -c 'from importlib.metadata import version; from packaging.version import Version; assert Version(version("hhcm-forest")) >= Version("1.1.23")'
 
-# upgrade pip and setuptools
-RUN python3 -m pip install --upgrade pip setuptools wheel
-# Modify PATH to include local bin
-RUN echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
+ARG RECIPES_REPO=https://github.com/ADVRHumanoids/multidof_recipes.git
+ARG RECIPES_REF=ros2
+ARG BUILD_JOBS=4
 
-# concert packages
-RUN forest grow pybind11 --verbose --jobs 4 --pwd user
-RUN forest grow concert_all --verbose --jobs 4 --pwd user
+RUN forest init && \
+    forest add-recipes "$RECIPES_REPO" --tag "$RECIPES_REF" --clone-protocol https
 
-# a few usage tips..
-RUN echo 'echo "USAGE:"' >> /home/user/.bashrc
-RUN echo 'echo "run simulation....: mon launch concert_gazebo concert.launch"' >> /home/user/.bashrc
-RUN echo 'echo "run monitoring gui: xbot2-gui"' >> /home/user/.bashrc
-RUN echo 'echo "run CartesI/O IK..: mon launch concert_cartesio concert.launch xbot:=true gui:=true"' >> /home/user/.bashrc
-RUN echo 'echo "run odometry......: mon launch concert_odometry concert_odometry.launch publish_ground_truth:=true gui:=true"' >> /home/user/.bashrc
+# Build this checkout, including uncommitted changes and the initialized
+# concert_resources submodule. Only ROS 2 packages selected by the recipe build.
+# Keep the dependency tree in the Forest recipes, rather than duplicating it
+# here. Forest resolves concert_all and reuses installed XBot2 binaries.
+COPY --chown=user:user . src/concert_description/
+RUN test -f src/concert_description/concert_resources/CMakeLists.txt && \
+    mkdir -p ros_src && \
+    ln -s ../src/concert_description ros_src/concert_description && \
+    forest grow concert_all --verbose --jobs "$BUILD_JOBS" --clone-protocol https && \
+    echo 'source /home/user/concert-docker-env.bash' >> /home/user/.bashrc
 
-RUN echo 'echo ""' >> /home/user/.bashrc
+# Resolve the installed launch dependencies and executables before shipping.
+RUN for package in concert_gazebo concert_xbot2 modular_resources \
+        realsense_gazebo_description ros_gz_sim ros_gz_bridge ros_gz_image xacro; do \
+        ros2 pkg prefix "$package"; \
+    done && command -v xbot2-core xbot2_gui_server xbot2_gui && \
+    python -c 'import modular.URDF_writer'
 
-# set ownership to user for the whole home folder
-RUN chown -R user .
-
-# change user, copy start script (launches gazebo and gzweb)
-USER user
+ENTRYPOINT ["/usr/local/bin/concert-entrypoint"]
+CMD ["/bin/bash"]

@@ -1,0 +1,19 @@
+# Only send the ROS 2 packages used by the recipe and the Docker helpers.
+**
+!docker/
+!docker/**
+!concert_cartesio/
+!concert_cartesio/**
+!concert_examples/
+!concert_examples/**
+!concert_gazebo/
+!concert_gazebo/**
+!concert_xbot2/
+!concert_xbot2/**
+!concert_odometry_ros2/
+!concert_odometry_ros2/**
+!concert_resources/
+!concert_resources/**
+**/.git
+**/__pycache__
+**/*.pyc
