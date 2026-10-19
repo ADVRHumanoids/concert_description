@@ -6,6 +6,41 @@ provides the required Gazebo integration through `ros-jazzy-simulation`.
 This image adds CONCERT's source dependencies and the ROS 2 packages from
 this checkout.
 
+## Registry and publishing
+
+The CONCERT image is published to
+`ghcr.io/advrhumanoids/concert_description`. The XBot2 base image continues to
+come from Docker Hub; existing CONCERT images on Docker Hub are not removed.
+The GHCR image becomes available after the first successful publication.
+
+The workflow in `.github/workflows/docker.yml` builds pull requests targeting
+`ros2` without logging in or publishing images. On push, it publishes:
+
+- `latest` for the `ros2` branch;
+- `ros1-legacy` for the `master` branch, preserving the existing tagging rule;
+- the Git tag for release tags matching `v[0-9]+.[0-9]+.[0-9]+*`;
+- an additional `sha-<full-commit-sha>` tag for each published build.
+
+Authentication uses the workflow's `GITHUB_TOKEN` with `packages: write`;
+Docker Hub credentials and a separate personal token are not required for
+publishing. In GitHub's package settings, grant the workflow repository Write
+access under **Manage Actions access**, or use inherited repository access.
+The image's `org.opencontainers.image.source` label identifies the source
+repository. The package's visibility is managed separately; public images can
+be pulled anonymously, while private images require an authenticated account
+with package access. See the
+[GitHub Container Registry documentation](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry).
+
+The build and run helpers default to GHCR. To use a different image repository,
+set `IMAGE` (without a tag) when invoking either helper, for example:
+
+```bash
+IMAGE=concert_description-dev ./docker/build-docker.bash
+IMAGE=concert_description-dev ./docker/run-docker.bash
+```
+
+## Build and run
+
 From the repository root, initialize the resources submodule and build:
 
 ```bash
@@ -57,7 +92,7 @@ environment, and the Forest workspace. This also applies to commands passed
 directly to `docker run`. For example:
 
 ```bash
-docker run --rm edoardoromiti/concert_description:latest \
+docker run --rm ghcr.io/advrhumanoids/concert_description:latest \
     ros2 pkg prefix concert_gazebo
 ```
 

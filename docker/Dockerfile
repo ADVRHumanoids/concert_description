@@ -3,6 +3,8 @@
 ARG BASE_IMAGE=hhcmhub/xbot2-noble-dev:latest
 FROM ${BASE_IMAGE}
 
+LABEL org.opencontainers.image.source="https://github.com/ADVRHumanoids/concert_description"
+
 USER root
 SHELL ["/bin/bash", "-eo", "pipefail", "-c"]
 
