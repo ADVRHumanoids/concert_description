@@ -56,6 +56,13 @@ forest grow concert_description
 ```
 which will clone this repo and install the [modular](https://github.com/ADVRHumanoids/modular_hhcm) package. 
 
+Simulation dependencies are included by default. For hardware use, run
+`forest grow concert_description --mode rt` (or `forest grow concert_all --mode rt`).
+This keeps the RealSense camera descriptions while skipping the Gazebo camera
+plugin dependency; it does not configure real-time execution or remove other
+simulation packages. See the [RealSense gazebo description README](https://github.com/ADVRHumanoids/realsense_gazebo_description/tree/gz-harmonic#forest-builds-simulation-and-hardware)
+for details.
+
 If you have the **XBot2 binaries** installed you are ready to simulate the CONCERT robot!
 
 ---

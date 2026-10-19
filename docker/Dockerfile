@@ -41,8 +41,6 @@ RUN forest init && \
 # here. Forest resolves concert_all and reuses installed XBot2 binaries.
 COPY --chown=user:user . src/concert_description/
 RUN test -f src/concert_description/concert_resources/CMakeLists.txt && \
-    mkdir -p ros_src && \
-    ln -s ../src/concert_description ros_src/concert_description && \
     forest grow concert_all --verbose --jobs "$BUILD_JOBS" --clone-protocol https && \
     echo 'source /home/user/concert-docker-env.bash' >> /home/user/.bashrc
 
