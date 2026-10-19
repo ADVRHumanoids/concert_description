@@ -64,6 +64,20 @@ ros2 launch concert_gazebo modular.launch.py
 ```
 
 The existing `run-docker.bash` supplies NVIDIA/X11 access and starts a terminal.
+It also sets `__NV_PRIME_RENDER_OFFLOAD=1` and
+`__GLX_VENDOR_LIBRARY_NAME=nvidia` so OpenGL applications request NVIDIA on
+hybrid Intel/NVIDIA systems. These are runtime settings; changing the script
+does not require rebuilding the image. To test in an already running container:
+
+```bash
+__NV_PRIME_RENDER_OFFLOAD=1 __GLX_VENDOR_LIBRARY_NAME=nvidia rviz2
+```
+
+If graphics still fail, check `nvidia-smi` inside the container. If `glxinfo`
+is available, `glxinfo -B` should report an NVIDIA OpenGL renderer; `nvidia-smi`
+alone verifies GPU visibility, not OpenGL renderer selection. See NVIDIA's
+[PRIME render offload documentation](https://download.nvidia.com/XFree86/Linux-x86_64/570.169/README/primerenderoffload.html).
+
 Communicating with external ROS nodes may require additional network/DDS
 configuration. The GUI launcher configuration must also use container-valid
 paths if it contains absolute host workspace paths.
